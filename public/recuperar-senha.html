@@ -1,116 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Recuperar senha – Auditório CBMES</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        body {
-          margin:0;
-          font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-          background:#f4f5f7;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          min-height:100vh;
-        }
-        .card {
-          background:#fff;
-          padding:24px 26px 22px;
-          border-radius:14px;
-          box-shadow:0 10px 35px rgba(0,0,0,.1);
-          max-width:380px;
-          width:100%;
-        }
-        h1 { margin:0 0 4px; font-size:1rem; }
-        p { margin:0 0 14px; font-size:.8rem; color:#555; }
-        label { font-size:.75rem; font-weight:600; }
-        input {
-          width:100%;
-          padding:7px 9px;
-          border-radius:8px;
-          border:1px solid #ccd1db;
-          font-size:.8rem;
-        }
-        .form-group { margin-bottom:10px; display:flex; flex-direction:column; gap:4px; }
-        button {
-          width:100%;
-          border:none;
-          padding:9px 0;
-          border-radius:999px;
-          background:#c71c22;
-          color:#fff;
-          font-weight:600;
-          cursor:pointer;
-          margin-top:4px;
-        }
-        .msg {
-          font-size:.75rem;
-          margin-bottom:8px;
-          display:none;
-        }
-        .msg.ok { color: #1e7a3b; }
-        .msg.erro { color:#c71c22; }
-        .link-btn {
-          border:none;
-          background:none;
-          padding:0;
-          margin-top:8px;
-          font-size:.75rem;
-          color:#333;
-          cursor:pointer;
-          text-decoration:underline;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Recuperar senha – Auditório CBMES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/recuperar-senha.css">
 </head>
 <body>
-<div class="card">
-    <h1>Recuperar senha</h1>
-    <p>Informe o e-mail de login. Se ele estiver cadastrado, enviaremos um link para redefinir sua senha.</p>
+
+<div class="page-wrapper">
+  <div class="card">
+    <h1 class="titulo">Recuperar senha</h1>
+    <p class="subtitulo">
+      Informe o e-mail de login. Se ele estiver cadastrado, enviaremos um link para redefinir sua senha.
+    </p>
 
     <div class="msg" id="msg"></div>
 
-    <form id="formRecuperar">
-        <div class="form-group">
-            <label>E-mail de login</label>
-            <input type="email" name="email" required />
-        </div>
-        <button type="submit">Enviar link de redefinição</button>
+    <form id="formRecuperar" class="form-recuperar">
+      <div class="form-group">
+        <label for="email">E-mail de login</label>
+        <input type="email" id="email" name="email" required autocomplete="username">
+      </div>
+
+      <button type="submit" class="btn-primario">Enviar link de redefinição</button>
     </form>
 
-    <button type="button" class="link-btn" id="btnVoltar">Voltar para o login</button>
+    <button type="button" class="btn-link" id="btnVoltarLogin">
+      ⟵ Voltar para o login
+    </button>
+  </div>
 </div>
 
-<script>
-    document.getElementById('formRecuperar').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const msg = document.getElementById('msg');
-      msg.style.display = 'none';
-
-      try {
-        const resp = await fetch('/api/forgot-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: form.email.value })
-        });
-
-        // Sempre trata como sucesso pro usuário
-        msg.textContent = 'Se o e-mail estiver cadastrado, um link de redefinição foi enviado.';
-        msg.className = 'msg ok';
-        msg.style.display = 'block';
-        form.reset();
-      } catch (err) {
-        console.error(err);
-        msg.textContent = 'Erro ao solicitar recuperação. Tente novamente.';
-        msg.className = 'msg erro';
-        msg.style.display = 'block';
-      }
-    });
-
-    document.getElementById('btnVoltar').addEventListener('click', () => {
-      window.location.href = '/login.html';
-    });
-</script>
+<script src="js/recuperar-senha.js"></script>
 </body>
 </html>

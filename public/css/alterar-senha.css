@@ -1,0 +1,142 @@
+:root {
+    --cbmes-red: #c71c22;
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --radius: 18px;
+    --shadow: 0 14px 40px rgba(0,0,0,.12);
+    --text-dark: #222;
+    --text-muted: #666;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.card {
+    background: var(--surface);
+    width: 100%;
+    max-width: 460px; /* semelhante ao login, um pouco mais largo */
+    padding: 32px 34px 26px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* Cabeçalho */
+.titulo {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.subtitulo {
+    margin-top: 6px;
+    margin-bottom: 20px;
+    font-size: .85rem;
+    color: var(--text-muted);
+}
+
+/* Formulário */
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #444;
+}
+
+input {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #c8ced8;
+    font-size: .85rem;
+    width: 100%;
+}
+
+/* Botões */
+.btn-primario {
+    margin-top: 6px;
+    padding: 11px 0;
+    border: none;
+    border-radius: 999px;
+    background: var(--cbmes-red);
+    color: white;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primario:hover {
+    background: #a2161c;
+}
+
+.btn-link {
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: #444;
+    font-size: .8rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.btn-link:hover {
+    color: var(--cbmes-red);
+}
+
+/* Alertas */
+.alerta {
+    display: none;
+    font-size: .78rem;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.alerta.erro {
+    background: #ffe2e2;
+    color: #a60000;
+    border-left: 3px solid #d00000;
+}
+
+.alerta.sucesso {
+    background: #e3ffe6;
+    color: #006b1b;
+    border-left: 3px solid #00a131;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .card {
+        max-width: 92%;
+        padding: 26px 22px 22px;
+    }
+
+    .titulo {
+        font-size: 1.22rem;
+    }
+}

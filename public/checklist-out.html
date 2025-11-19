@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Check-OUT do Auditório – CBMES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/checklist.css" />
+</head>
+<body>
+
+<div class="page-wrapper">
+  <div class="card">
+    <h1 class="titulo">Check-OUT do auditório</h1>
+    <p class="subtitulo" id="infoReserva">
+      Carregando informações da reserva...
+    </p>
+
+    <div id="mensagem" class="mensagem" style="display:none;"></div>
+
+    <form id="formCheckout" class="form-grid" style="display:none;">
+
+      <!-- SEÇÃO 1 – CHECK-OUT -->
+      <h2 class="subtitulo-secao">Seção 1 – Check-OUT (encerramento do evento)</h2>
+      <p class="texto-menor">
+        No momento do check-out, registre as condições em que o ambiente foi entregue e confirme seu check-out.
+      </p>
+
+      <div class="form-group">
+        <label for="email_checkout">E-mail de quem está respondendo *</label>
+        <input type="email"
+               id="email_checkout"
+               name="email_checkout"
+               required
+               placeholder="nome@orgao.gov.br" />
+      </div>
+
+      <div class="form-group">
+        <label for="nome_responsavel_checkout">Nome de quem está respondendo *</label>
+        <input type="text"
+               id="nome_responsavel_checkout"
+               name="nome_responsavel_checkout"
+               required
+               placeholder="Informe seu nome completo" />
+      </div>
+
+      <div class="form-group">
+        <label for="hora_encerramento">Horário de encerramento *</label>
+        <input type="time"
+               id="hora_encerramento"
+               name="hora_encerramento"
+               required />
+      </div>
+
+      <div class="form-group">
+        <label>O ambiente foi entregue limpo e organizado? *</label>
+        <div class="opcoes">
+          <label><input type="radio" name="ambiente_entregue_limpo" value="SIM" required> Sim</label>
+          <label><input type="radio" name="ambiente_entregue_limpo" value="NAO"> Não</label>
+        </div>
+        <textarea name="ambiente_entregue_obs"
+                  placeholder="Observações (se necessário)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>A iluminação foi desligada? *</label>
+        <div class="opcoes">
+          <label><input type="radio" name="iluminacao_desligada" value="SIM" required> Sim</label>
+          <label><input type="radio" name="iluminacao_desligada" value="NAO"> Não</label>
+        </div>
+        <textarea name="iluminacao_desligada_obs"
+                  placeholder="Observações (se necessário)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>A climatização foi desligada? *</label>
+        <div class="opcoes">
+          <label><input type="radio" name="climatizacao_desligada" value="SIM" required> Sim</label>
+          <label><input type="radio" name="climatizacao_desligada" value="NAO"> Não</label>
+        </div>
+        <textarea name="climatizacao_desligada_obs"
+                  placeholder="Observações (se necessário)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>As cadeiras e mesas permanecem como estavam no momento do Check-IN? *</label>
+        <div class="opcoes">
+          <label><input type="radio" name="mobilia_igual_checkin" value="SIM" required> Sim</label>
+          <label><input type="radio" name="mobilia_igual_checkin" value="NAO"> Não</label>
+        </div>
+        <textarea name="mobilia_igual_checkin_obs"
+                  placeholder="Observações (se necessário)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Ocorreram danos, problemas ou irregularidades durante o uso do auditório? *</label>
+        <div class="opcoes">
+          <label><input type="radio" name="danos_ocorridos" value="NAO" required> Não</label>
+          <label><input type="radio" name="danos_ocorridos" value="SIM"> Sim</label>
+        </div>
+        <textarea name="danos_ocorridos_obs"
+                  id="danos_ocorridos_obs"
+                  placeholder="Descreva os danos, problemas ou irregularidades (obrigatório em caso de resposta 'Sim')."></textarea>
+      </div>
+
+      <!-- SEÇÃO 2 – CONFIRMAÇÃO DE CHECK-OUT -->
+      <h2 class="subtitulo-secao">Seção 2 – Confirmação de Check-OUT</h2>
+
+      <div class="form-group">
+        <div class="opcoes-coluna">
+          <label>
+            <input type="radio"
+                   name="confirmacao_checkout"
+                   id="conf_sem_alteracoes"
+                   value="SEM_ALTERACOES">
+            Confirmo que realizei o check-out e deixei o espaço sem alterações.
+          </label>
+          <label>
+            <input type="radio"
+                   name="confirmacao_checkout"
+                   id="conf_com_alteracoes"
+                   value="COM_ALTERACOES">
+            Confirmo que realizei o check-out e deixei o espaço com alterações.
+          </label>
+        </div>
+        <p class="texto-menor">
+          • A opção <strong>“sem alterações”</strong> só poderá ser escolhida se todas as respostas forem positivas (Sim) e não houver danos.<br>
+          • A opção <strong>“com alterações”</strong> deve ser utilizada caso alguma resposta seja “Não” ou tenham ocorrido danos.
+        </p>
+      </div>
+
+      <button type="submit" class="btn-primario">
+        Confirmar Check-OUT
+      </button>
+    </form>
+
+    <button type="button" class="btn-link" id="btnVoltarInicio">
+      ⟵ Voltar para a página inicial
+    </button>
+  </div>
+</div>
+
+<script src="js/checklist-out.js"></script>
+</body>
+</html>

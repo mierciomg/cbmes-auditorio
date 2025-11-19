@@ -1,0 +1,186 @@
+:root {
+  --cbmes-red: #c71c22;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --shadow: 0 12px 40px rgba(0,0,0,.12);
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.page-wrapper {
+  width: 100%;
+  max-width: 880px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 26px 30px 22px;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.subtitulo {
+  margin-top: 6px;
+  margin-bottom: 12px;
+  font-size: .9rem;
+  color: #555;
+}
+
+.subtitulo-secao {
+  margin: 18px 0 10px;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: .9rem;
+}
+
+.form-group label {
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="time"],
+textarea {
+  border-radius: 10px;
+  border: 1px solid #c7cedb;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: .9rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: .88rem;
+}
+
+.opcoes-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: .88rem;
+}
+
+.texto-menor {
+  font-size: .85rem;
+  color: #555;
+}
+
+/* Bloco de informações (Seção 1) */
+.bloco-informacoes {
+  background: #fafbfd;
+  border-radius: 10px;
+  border: 1px solid #dde3f0;
+  padding: 10px 12px;
+  font-size: .85rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.bloco-informacoes ul {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.texto-alerta {
+  color: #a00000;
+  font-weight: 600;
+}
+
+/* Aceite das condições */
+.aceite-condicoes span {
+  font-size: .9rem;
+  font-weight: 500;
+}
+
+/* Botões */
+.btn-primario {
+  margin-top: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: var(--cbmes-red);
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primario:hover {
+  background: #a1161d;
+}
+
+.btn-link {
+  margin-top: 12px;
+  border: none;
+  background: none;
+  color: #444;
+  font-size: .8rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Mensagens */
+.mensagem {
+  margin: 10px 0 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: .86rem;
+}
+
+.mensagem.ok {
+  background: #e6ffe8;
+  color: #106b2b;
+  border-left: 3px solid #179a3d;
+}
+
+.mensagem.erro {
+  background: #ffe5e5;
+  color: #a01616;
+  border-left: 3px solid #d21f1f;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 22px 18px 20px;
+  }
+}

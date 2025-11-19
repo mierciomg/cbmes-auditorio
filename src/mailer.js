@@ -1,194 +1,139 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
+// src/mailer.js
+const { enviarEmail } = require('./services/mail.service');
 
-const {
-  SMTP_HOST,
-  SMTP_PORT,
-  SMTP_SECURE,
-  SMTP_USER,
-  SMTP_PASS,
-  MAIL_FROM,
-  APP_PUBLIC_URL
-} = process.env;
-
-// === TRANSPORTER GERAL ======================================================
-
-const transporter = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: Number(SMTP_PORT || 587),
-  secure: SMTP_SECURE === 'true',
-  auth: SMTP_USER
-    ? { user: SMTP_USER, pass: SMTP_PASS }
-    : undefined
-});
-
-async function enviarEmail({ to, subject, html }) {
-  if (!to) return;
-  try {
-    await transporter.sendMail({
-      from: MAIL_FROM || '"Auditório CBMES" <nao-responder@cbmes.es.gov.br>',
-      to,
-      subject,
-      html
-    });
-    console.log(`📧 E-mail enviado para ${to}: ${subject}`);
-  } catch (err) {
-    console.error('Erro ao enviar e-mail:', err);
-  }
+// Helper simples para formatar datas
+function formatarData(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 }
 
-// === HELPERS DE DATA ========================================================
+// HTML padrão para o topo + rodapé
+function layoutBase(conteudo) {
+  return `
+    <div style="font-family: Arial, sans-serif; color:#333; max-width:650px;">
+      <h2 style="color:#8a0000; margin-bottom:10px;">
+        Sistema de Agendamento do Auditório – CBMES
+      </h2>
 
-function formatarDataBR(data) {
-  if (!data) return '';
-  const d = new Date(data);
-  return d.toLocaleDateString('pt-BR');
+      <div style="padding:14px 18px; border-radius:8px; background:#fafafa; border:1px solid #ddd;">
+        ${conteudo}
+      </div>
+
+      <p style="margin-top:20px; font-size:12px; color:#666;">
+        Este é um e-mail automático. Não responda.
+      </p>
+    </div>
+  `;
 }
 
-function textoIntervaloBR(reserva) {
-  const ini = formatarDataBR(reserva.data_evento);
-  const fim = reserva.data_fim && reserva.data_fim !== reserva.data_evento
-    ? formatarDataBR(reserva.data_fim)
-    : ini;
-
-  return ini === fim ? ini : `${ini} a ${fim}`;
-}
-
-// === E-MAIL: NOVA RESERVA ===================================================
-
+// ======================================================
+// 1) Email – Nova solicitação recebida
+// ======================================================
 async function enviarEmailNovaReserva(reserva) {
-  const assunto = `CBMES – Recebemos sua solicitação de uso do auditório (#${reserva.id})`;
-  const urlSistema = APP_PUBLIC_URL || 'http://localhost:3000';
+  const conteudo = `
+    <p>Prezado(a) <strong>${reserva.responsavel}</strong>,</p>
+    
+    <p>Sua solicitação de uso do auditório foi registrada com sucesso.</p>
 
-  const html = `
-    <p>Prezado(a) ${reserva.responsavel},</p>
+    <p><strong>Detalhes da solicitação:</strong></p>
 
-    <p>Recebemos sua <strong>solicitação de uso do auditório do CBMES</strong>.</p>
-
-    <p><strong>Dados da solicitação:</strong></p>
     <ul>
-      <li><strong>ID:</strong> ${reserva.id}</li>
-      <li><strong>Instituição:</strong> ${reserva.instituicao}</li>
-      <li><strong>Data do evento:</strong> ${textoIntervaloBR(reserva)}</li>
+      <li><strong>Data inicial:</strong> ${formatarData(reserva.data_evento)}</li>
+      <li><strong>Data final:</strong> ${formatarData(reserva.data_fim || reserva.data_evento)}</li>
       <li><strong>Período:</strong> ${reserva.periodo}</li>
-      <li><strong>Finalidade:</strong> ${reserva.finalidade}</li>
-      <li><strong>Status:</strong> ${reserva.status}</li>
+      <li><strong>Responsável:</strong> ${reserva.responsavel}</li>
+      <li><strong>Instituição:</strong> ${reserva.instituicao}</li>
     </ul>
 
-    <p>Sua solicitação será analisada pela equipe responsável do CBMES.</p>
-
-    <p>Este e-mail é automático. Em caso de dúvidas, favor entrar em contato pelos canais oficiais do CBMES.</p>
-
-    <p>Atenciosamente,<br>
-    <strong>Corpo de Bombeiros Militar do Espírito Santo</strong><br>
-    Sistema de Agendamento do Auditório</p>
-
-    <p><a href="${urlSistema}" target="_blank">Acessar a plataforma de agendamento</a></p>
+    <p>Você receberá novo e-mail assim que a solicitação for analisada.</p>
   `;
 
   await enviarEmail({
     to: reserva.email,
-    subject: assunto,
-    html
+    subject: 'Solicitação registrada – Auditório CBMES',
+    html: layoutBase(conteudo),
   });
 }
 
-// === E-MAIL: DECISÃO (APROVADA / NEGADA / CANCELADA) =======================
-
+// ======================================================
+// 2) Email – Decisão (APROVADA / NEGADA / CANCELADA)
+// ======================================================
 async function enviarEmailDecisaoReserva(reserva) {
-  const status = (reserva.status || '').toUpperCase();
-  const urlSistema = APP_PUBLIC_URL || 'http://localhost:3000';
+  const status = reserva.status;
 
-  let assunto;
-  let textoDecisao = '';
+  let conteudo = `
+    <p>Prezado(a) <strong>${reserva.responsavel}</strong>,</p>
+  `;
 
   if (status === 'APROVADA') {
-    assunto = `CBMES – Sua reserva de auditório foi APROVADA (#${reserva.id})`;
-    textoDecisao = `
-      <p>Sua solicitação de uso do auditório do CBMES foi <strong>APROVADA</strong>.</p>
+  conteudo += `
+      <p>Informamos que a sua solicitação de uso do auditório foi 
+        <strong style="color:green">APROVADA</strong>.
+      </p>
 
-      <p><strong>Informações sobre a estrutura do auditório:</strong></p>
-      <ul>
-        <li><strong>Capacidade de cadeiras:</strong> aproximadamente 80 lugares sentados (ajuste conforme a realidade).</li>
-        <li><strong>Multimídia:</strong> projetor/datashow com tela de projeção frontal.</li>
-        <li><strong>Áudio:</strong> mesa de som básica com entrada para notebook e microfones.</li>
-        <li><strong>Microfones:</strong> 1 microfone com fio e 1 microfone sem fio (se disponível no dia do evento).</li>
-        <li><strong>Climatização:</strong> ambiente climatizado.</li>
-        <li><strong>Apoio:</strong> ponto de energia próximo à área de apresentação.</li>
-      </ul>
+      <p><strong>Data inicial do evento:</strong> ${formatarData(reserva.data_evento)}</p>
+      <p><strong>Data final do evento:</strong> ${formatarData(reserva.data_fim || reserva.data_evento)}</p>
+      <p><strong>Período:</strong> ${reserva.periodo || ''}</p>
 
-      <p><strong>Orientações gerais:</strong></p>
-      <ul>
-        <li>Chegar com antecedência mínima de 30 minutos para teste de som e imagem.</li>
-        <li>Trazer apresentações em pen drive e, se possível, também em arquivo PDF como alternativa.</li>
-        <li>Qualquer necessidade específica (equipamentos adicionais, montagem especial etc.) deve ser comunicada previamente ao responsável do CBMES.</li>
-        <li>Manter o ambiente organizado ao término do evento.</li>
-      </ul>
+      <hr style="border:none; border-top:1px solid #ddd; margin:14px 0;" />
+
+      <p style="margin:10px 0 4px;"><strong>Check-IN do auditório (entrada):</strong></p>
+      <p style="font-size:13px; margin:0 0 6px;">
+        No <strong>dia do início do evento</strong>, ao chegar ao auditório, acesse o formulário abaixo para registrar as condições de recebimento do espaço:
+      </p>
+      <p style="margin:8px 0 18px;">
+        <a href="${reserva.checklist_link}" 
+           style="background:#8a0000; color:#fff; padding:10px 16px; border-radius:6px; 
+                  text-decoration:none; font-weight:bold;"
+           target="_blank">
+          Preencher Check-IN do auditório
+        </a>
+      </p>
+
+      <p style="margin:10px 0 4px;"><strong>Check-OUT do auditório (encerramento):</strong></p>
+      <p style="font-size:13px; margin:0 0 6px;">
+        No <strong>último dia do evento</strong>, antes de deixar o auditório, acesse o formulário abaixo para registrar as condições de devolução do espaço:
+      </p>
+      <p style="margin:8px 0 10px;">
+        <a href="${reserva.checklist_checkout_link}" 
+           style="background:#444; color:#fff; padding:10px 16px; border-radius:6px; 
+                  text-decoration:none; font-weight:bold;"
+           target="_blank">
+          Preencher Check-OUT do auditório
+        </a>
+      </p>
+
+      <p style="font-size:12px; color:#a00; margin-top:10px;">
+        <strong>Atenção:</strong> o Check-IN só poderá ser preenchido no dia do início do evento, e o Check-OUT somente no último dia do evento.
+      </p>
     `;
+
   } else if (status === 'NEGADA') {
-    assunto = `CBMES – Sua solicitação de auditório foi NEGADA (#${reserva.id})`;
-    textoDecisao = `
-      <p>Sua solicitação de uso do auditório do CBMES foi <strong>NEGADA</strong>.</p>
-      ${
-        reserva.motivo_decisao
-          ? `<p><strong>Motivo informado:</strong> ${reserva.motivo_decisao}</p>`
-          : ''
-      }
+    conteudo += `
+      <p style="color:#a00000;"><strong>Sua solicitação foi NEGADA.</strong></p>
+      <p><strong>Motivo informado:</strong> ${reserva.motivo_decisao || 'Não informado'}</p>
     `;
+
   } else if (status === 'CANCELADA') {
-    assunto = `CBMES – Sua reserva de auditório foi CANCELADA (#${reserva.id})`;
-    textoDecisao = `
-      <p>Sua <strong>reserva</strong> de uso do auditório do CBMES foi <strong>CANCELADA</strong>.</p>
-      ${
-        reserva.motivo_decisao
-          ? `<p><strong>Motivo informado:</strong> ${reserva.motivo_decisao}</p>`
-          : ''
-      }
+    conteudo += `
+      <p style="color:#a00000;"><strong>A solicitação foi CANCELADA.</strong></p>
+      <p><strong>Motivo informado:</strong> ${reserva.motivo_decisao || 'Não informado'}</p>
     `;
   } else {
-    assunto = `CBMES – Atualização na sua solicitação de auditório (#${reserva.id})`;
-    textoDecisao = `<p>Houve uma atualização no status da sua solicitação.</p>`;
+    conteudo += `
+      <p>Status atualizado para: <strong>${status}</strong>.</p>
+    `;
   }
-
-  const html = `
-    <p>Prezado(a) ${reserva.responsavel},</p>
-
-    ${textoDecisao}
-
-    <p><strong>Dados da solicitação:</strong></p>
-    <ul>
-      <li><strong>ID:</strong> ${reserva.id}</li>
-      <li><strong>Instituição:</strong> ${reserva.instituicao}</li>
-      <li><strong>Data do evento:</strong> ${textoIntervaloBR(reserva)}</li>
-      <li><strong>Período:</strong> ${reserva.periodo}</li>
-      <li><strong>Finalidade:</strong> ${reserva.finalidade}</li>
-      ${
-        reserva.analisado_por
-          ? `<li><strong>Decisão registrada por:</strong> ${reserva.analisado_por}${
-              reserva.analisado_email ? ' (' + reserva.analisado_email + ')' : ''
-            }</li>`
-          : ''
-      }
-    </ul>
-
-    <p>Este e-mail é automático. Em caso de dúvidas, favor entrar em contato pelos canais oficiais do CBMES.</p>
-
-    <p>Atenciosamente,<br>
-    <strong>Corpo de Bombeiros Militar do Espírito Santo</strong><br>
-    Sistema de Agendamento do Auditório</p>
-
-    <p><a href="${urlSistema}" target="_blank">Acessar a plataforma de agendamento</a></p>
-  `;
 
   await enviarEmail({
     to: reserva.email,
-    subject: assunto,
-    html
+    subject: `Atualização da solicitação – ${status} – Auditório CBMES`,
+    html: layoutBase(conteudo),
   });
 }
 
 module.exports = {
-  enviarEmail,
   enviarEmailNovaReserva,
-  enviarEmailDecisaoReserva
+  enviarEmailDecisaoReserva,
 };

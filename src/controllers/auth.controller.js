@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+// src/controllers/auth.controller.js
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -7,18 +6,9 @@ const { enviarEmail } = require('../mailer');
 
 const APP_PUBLIC_URL = process.env.APP_PUBLIC_URL || 'http://localhost:3000';
 
-// Middleware simples de autenticação (para alterar senha logado)
-function requireAuth(req, res, next) {
-  if (!req.session || !req.session.user) {
-    return res.status(401).json({ error: 'Não autenticado.' });
-  }
-  next();
-}
-
 // =============== LOGIN / LOGOUT / ME ====================
 
-// POST /api/login
-router.post('/login', async (req, res) => {
+exports.login = async (req, res) => {
   const { email, senha } = req.body;
 
   if (!email || !senha) {
@@ -27,9 +17,10 @@ router.post('/login', async (req, res) => {
 
   try {
     const { rows } = await db.query(
-      'SELECT id, nome, email_login, senha_hash, ativo FROM auditorio_usuario WHERE email_login = $1',
+      'SELECT id, nome, email_login, senha_hash, ativo, is_admin, tipo_escopo FROM auditorio_usuario WHERE email_login = $1',
       [email]
     );
+
 
     if (rows.length === 0 || !rows[0].ativo) {
       return res.status(401).json({ error: 'Usuário ou senha inválidos.' });
@@ -42,38 +33,39 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Usuário ou senha inválidos.' });
     }
 
+    // mantém o uso de sessão, igual estava
     req.session.user = {
       id: usuario.id,
       nome: usuario.nome,
-      email: usuario.email_login
+      email: usuario.email_login,
+      admin: usuario.is_admin === true,
+      escopo: usuario.tipo_escopo || 'AMBOS'   // 👈 aqui
     };
+
 
     res.json({ ok: true, usuario: req.session.user });
   } catch (err) {
     console.error('Erro no login:', err);
     res.status(500).json({ error: 'Erro ao efetuar login.' });
   }
-});
+};
 
-// POST /api/logout
-router.post('/logout', (req, res) => {
+exports.logout = (req, res) => {
   req.session.destroy(() => {
     res.json({ ok: true });
   });
-});
+};
 
-// GET /api/me
-router.get('/me', (req, res) => {
+exports.me = (req, res) => {
   if (!req.session || !req.session.user) {
     return res.status(401).json({ error: 'Não autenticado.' });
   }
   res.json(req.session.user);
-});
+};
 
 // =============== ALTERAR SENHA (LOGADO) =================
 
-// POST /api/alterar-senha
-router.post('/alterar-senha', requireAuth, async (req, res) => {
+exports.alterarSenha = async (req, res) => {
   const { senha_atual, nova_senha } = req.body;
 
   if (!senha_atual || !nova_senha) {
@@ -113,12 +105,11 @@ router.post('/alterar-senha', requireAuth, async (req, res) => {
     console.error('Erro ao alterar senha:', err);
     res.status(500).json({ error: 'Erro ao alterar senha.' });
   }
-});
+};
 
 // =============== ESQUECI MINHA SENHA ====================
 
-// POST /api/forgot-password
-router.post('/forgot-password', async (req, res) => {
+exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -170,10 +161,9 @@ router.post('/forgot-password', async (req, res) => {
     console.error('Erro ao solicitar recuperação de senha:', err);
     res.status(500).json({ error: 'Erro ao solicitar recuperação de senha.' });
   }
-});
+};
 
-// GET /api/reset-token?token=...
-router.get('/reset-token', async (req, res) => {
+exports.checkResetToken = async (req, res) => {
   const { token } = req.query;
 
   if (!token) {
@@ -195,10 +185,9 @@ router.get('/reset-token', async (req, res) => {
     console.error('Erro ao validar token de reset:', err);
     res.status(500).json({ error: 'Erro ao validar token.' });
   }
-});
+};
 
-// POST /api/reset-password
-router.post('/reset-password', async (req, res) => {
+exports.resetPassword = async (req, res) => {
   const { token, nova_senha } = req.body;
 
   if (!token || !nova_senha) {
@@ -236,6 +225,178 @@ router.post('/reset-password', async (req, res) => {
     console.error('Erro ao redefinir senha:', err);
     res.status(500).json({ error: 'Erro ao redefinir senha.' });
   }
-});
+};
 
-module.exports = router;
+// ==================== USUÁRIOS INTERNOS (ADMIN) ====================
+
+// LISTAR USUÁRIOS
+exports.listarUsuarios = async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT id,
+             nome,
+             email_login,
+             is_admin,
+             ativo,
+             tipo_escopo
+        FROM auditorio_usuario
+       ORDER BY nome;
+    `);
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error('Erro ao listar usuários:', err);
+    res.status(500).json({ error: 'Erro ao listar usuários.' });
+  }
+};
+
+
+// CRIAR USUÁRIO
+exports.criarUsuario = async (req, res) => {
+  try {
+    const {
+      nome,
+      email_login,
+      senha,
+      is_admin,
+      ativo,
+      tipo_escopo
+    } = req.body;
+
+    if (!nome || !email_login || !senha) {
+      return res.status(400).json({ error: 'Nome, e-mail e senha são obrigatórios.' });
+    }
+
+    let escopo = (tipo_escopo || 'AMBOS').toUpperCase();
+    if (!['INTERNA', 'EXTERNA', 'AMBOS'].includes(escopo)) {
+      escopo = 'AMBOS';
+    }
+
+    const hash = await bcrypt.hash(senha, 10);
+
+    const sql = `
+      INSERT INTO auditorio_usuario
+        (nome, email_login, senha_hash, is_admin, ativo, tipo_escopo)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, nome, email_login, is_admin, ativo, tipo_escopo;
+    `;
+
+    const values = [nome, email_login, hash, is_admin === 'true' || is_admin === true, ativo !== 'false', escopo];
+
+    const { rows } = await db.query(sql, values);
+
+    res.status(201).json(rows[0]);
+
+  } catch (err) {
+    console.error('Erro ao criar usuário:', err);
+    res.status(500).json({ error: 'Erro ao criar usuário.' });
+  }
+};
+
+
+// ATUALIZAR USUÁRIO
+exports.atualizarUsuario = async (req, res) => {
+  const { id } = req.params;
+  const {
+    nome,
+    email_login,
+    senha,
+    is_admin,
+    ativo,
+    tipo_escopo
+  } = req.body;
+
+  try {
+    let escopo = (tipo_escopo || 'AMBOS').toUpperCase();
+    if (!['INTERNA', 'EXTERNA', 'AMBOS'].includes(escopo)) {
+      escopo = 'AMBOS';
+    }
+
+    let hash = null;
+
+    if (senha && senha.trim() !== '') {
+      hash = await bcrypt.hash(senha, 10);
+    }
+
+    const sql = `
+      UPDATE auditorio_usuario
+         SET nome = $1,
+             email_login = $2,
+             is_admin = $3,
+             ativo = $4,
+             tipo_escopo = $5,
+             senha_hash = COALESCE($6, senha_hash)
+       WHERE id = $7
+       RETURNING id, nome, email_login, is_admin, ativo, tipo_escopo;
+    `;
+
+    const values = [
+      nome,
+      email_login,
+      is_admin === 'true' || is_admin === true,
+      ativo !== 'false',
+      escopo,
+      hash,
+      id
+    ];
+
+    const { rows } = await db.query(sql, values);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error('Erro ao atualizar usuário:', err);
+    res.status(500).json({ error: 'Erro ao atualizar usuário.' });
+  }
+};
+
+
+// ATIVAR USUÁRIO
+exports.ativarUsuario = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { rows } = await db.query(
+      `UPDATE auditorio_usuario
+          SET ativo = TRUE
+        WHERE id = $1
+    RETURNING id, nome, email_login, ativo;`,
+      [id]
+    );
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error('Erro ao ativar usuário:', err);
+    res.status(500).json({ error: 'Erro ao ativar usuário.' });
+  }
+};
+
+
+// INATIVAR USUÁRIO
+exports.inativarUsuario = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { rows } = await db.query(
+      `UPDATE auditorio_usuario
+          SET ativo = FALSE
+        WHERE id = $1
+    RETURNING id, nome, email_login, ativo;`,
+      [id]
+    );
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error('Erro ao inativar usuário:', err);
+    res.status(500).json({ error: 'Erro ao inativar usuário.' });
+  }
+};
+
+

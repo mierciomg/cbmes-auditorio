@@ -1,507 +1,292 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <title>CBMES – Painel Interno do Auditório</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        :root {
-          --cbmes-red: #c71c22;
-          --bg: #f4f5f7;
-          --surface: #ffffff;
-          --shadow: 0 10px 30px rgba(0,0,0,.08);
-          --radius: 14px;
-        }
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
-          background: var(--bg);
-          color: #222;
-        }
-        header {
-          background: linear-gradient(120deg, #1f2430, #3a4153);
-          color: #fff;
-          padding: 14px 24px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-        header h1 { margin: 0; font-size: 1rem; }
-        header small { font-size: .7rem; opacity: .8; display:block; }
-        .tag {
-          background: rgba(0,0,0,.3);
-          padding: 4px 10px;
-          border-radius: 999px;
-          font-size: .7rem;
-        }
-        main {
-          padding: 20px;
-          max-width: 1150px;
-          margin: 0 auto;
-        }
-        .card {
-          background: var(--surface);
-          border-radius: var(--radius);
-          box-shadow: var(--shadow);
-          padding: 16px 18px 18px;
-        }
+  <meta charset="UTF-8">
+  <title>CBMES – Painel Interno do Auditório</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/modal-transformar.css">
+  <link rel="stylesheet" href="css/admin.css">
 
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: .78rem;
-        }
-        th, td {
-          border-bottom: 1px solid #eee;
-          padding: 6px 8px;
-          text-align: left;
-          vertical-align: top;
-        }
-        th {
-          background: #f5f6fb;
-          font-weight: 600;
-          position: sticky;
-          top: 0;
-          z-index: 1;
-        }
-        tr:nth-child(even) td { background: #fafbff; }
-
-        .status-pill {
-          display: inline-block;
-          padding: 2px 8px;
-          border-radius: 999px;
-          font-size: .7rem;
-          font-weight: 600;
-        }
-        .st-pendente { background: #fff6e5; color: #a86f00; }
-        .st-aprovada { background: #e7f8e7; color: #217c3f; }
-        .st-negada  { background: #fde7e7; color: #9e1c1c; }
-        .st-cancelada { background: #e5ecff; color: #274b8f; }
-
-        .btn {
-          border: none;
-          border-radius: 999px;
-          padding: 4px 10px;
-          font-size: .7rem;
-          cursor: pointer;
-          margin-right: 4px;
-        }
-        .btn-aprovar { background: #1bbd6d; color: #fff; }
-        .btn-negar   { background: #e65454; color: #fff; }
-        .btn-link {
-          border-radius: 999px;
-          padding: 3px 8px;
-          font-size: .7rem;
-          border: 1px solid #ccc;
-          background: #fff;
-          cursor: pointer;
-        }
-
-        .top-bar {
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          gap:10px;
-          margin-bottom:8px;
-          flex-wrap:wrap;
-        }
-        .info-analista {
-          font-size:.7rem;
-          color:#444;
-        }
-        .subtitle {
-          font-size:.75rem;
-          color:#666;
-          margin-bottom:4px;
-        }
-
-        .filter-bar {
-          display:flex;
-          gap:8px;
-          flex-wrap:wrap;
-          margin-top:6px;
-          margin-bottom:4px;
-        }
-        .filter-bar label {
-          font-size:.7rem;
-          font-weight:600;
-          margin-right:4px;
-        }
-        .filter-group {
-          display:flex;
-          align-items:center;
-          gap:4px;
-        }
-        .filter-bar select {
-          padding: 5px 8px;
-          border-radius: 999px;
-          border: 1px solid #ccd1db;
-          font-size: .75rem;
-          background:#fff;
-        }
-    </style>
 </head>
+
 <body>
-<header>
+
+  <header class="app-header">
     <div>
-        <h1>Painel Interno – Agendamento do Auditório</h1>
-        <small>Corpo de Bombeiros Militar do Espírito Santo – CAT / QCG</small>
+      <div class="app-header-title">Painel Interno – Agendamento do Auditório</div>
+      <div class="app-header-sub">Corpo de Bombeiros Militar do Espírito Santo – CAT / QCG</div>
     </div>
     <div class="tag">Uso restrito a pessoal autorizado</div>
-</header>
+  </header>
 
-<main>
-    <div class="card">
-        <div class="top-bar">
-            <div>
-                <p style="margin:0;">
-                    <strong>Solicitações de uso do auditório</strong><br>
-                    <span class="info-analista" id="infoUsuario">
-        Verificando usuário logado...
-      </span>
-                </p>
-            </div>
-            <div>
-                <button class="btn-link" id="btnAlterarSenha">Alterar senha</button>
-                <button class="btn-link" id="btnLogout">Sair</button>
-            </div>
-        </div>
+  <main class="main-wrapper">
 
-
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label for="filtroTipo">Tipo de solicitação:</label>
-                <select id="filtroTipo">
-                    <option value="">Todos</option>
-                    <option value="INTERNA">Interna (CBMES)</option>
-                    <option value="EXTERNA">Externa</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filtroStatus">Status:</label>
-                <select id="filtroStatus">
-                    <option value="">Todos</option>
-                    <option value="PENDENTE">Pendente</option>
-                    <option value="APROVADA">Aprovada</option>
-                    <option value="NEGADA">Negada</option>
-                    <option value="CANCELADA">Cancelada</option>
-                </select>
-            </div>
-        </div>
-
-        <p class="subtitle">
-            Pendentes aparecem primeiro. Use os filtros acima para visualizar por tipo e status.
-        </p>
-
-        <div style="max-height:65vh;overflow:auto;margin-top:10px;">
-            <table id="tabelaReservas">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Data / Período</th>
-                    <th>Instituição / Contato</th>
-                    <th>Finalidade / Observações</th>
-                    <th>Anexo</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- linhas via JS -->
-                </tbody>
-            </table>
-        </div>
+    <!-- ABAS SUPERIORES -->
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-target="secSolicitacoes">Solicitações</button>
+      <button class="tab-btn" data-target="secChecklists">Checklists (Check-IN / Check-OUT)</button>
+      <button class="tab-btn" data-target="secUsuarios">Usuários</button>
     </div>
-</main>
 
-<script>
-    const API_BASE = '/api';
-    const periodosPadrao = {
-      INTEGRAL: 'Integral (08h às 18h)',
-      MANHA:    'Manhã (08h às 12h)',
-      TARDE:    'Tarde (13h às 17h)',
-      NOITE:    'Noite (18h às 21h)'
-    };
+    <!-- ABA 1: SOLICITAÇÕES (SEU CONTEÚDO ORIGINAL) -->
+    <section id="secSolicitacoes" class="panel card tab-section active">
 
-    let todasReservas = [];
+      <div class="panel-top">
+        <div>
+          <h2 class="panel-title">Solicitações de Uso do Auditório do CAT/CBMES</h2>
+          <div id="infoUsuario" class="info-analista">
+            Verificando usuário logado...
+          </div>
+        </div>
 
-    function formatarDataISO(iso) {
-      if (!iso) return '';
-      return iso.slice(0,10).split('-').reverse().join('/');
-    }
+        <div class="panel-actions">
+          <button id="btnAlterarSenha" class="btn-header">Alterar senha</button>
+          <button id="btnLogout" class="btn-header btn-header-danger">Sair</button>
+        </div>
+      </div>
 
-    function criarStatusPill(status) {
-      const span = document.createElement('span');
-      span.classList.add('status-pill');
-      const st = (status || '').toUpperCase();
-      if (st === 'PENDENTE')  span.classList.add('st-pendente');
-      if (st === 'APROVADA')  span.classList.add('st-aprovada');
-      if (st === 'NEGADA')    span.classList.add('st-negada');
-      if (st === 'CANCELADA') span.classList.add('st-cancelada');
-      span.textContent = st || '---';
-      return span;
-    }
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="filtroTipo">Tipo de solicitação:</label>
+          <select id="filtroTipo">
+            <option value="">Todos</option>
+            <option value="INTERNA">Interna (CBMES)</option>
+            <option value="EXTERNA">Externa</option>
+          </select>
+        </div>
 
-    function renderTabela() {
-      const tbody = document.querySelector('#tabelaReservas tbody');
-      tbody.innerHTML = '';
+        <div class="filter-group">
+          <label for="filtroStatus">Status:</label>
+          <select id="filtroStatus">
+            <option value="">Todos</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="APROVADA">Aprovada</option>
+            <option value="NEGADA">Negada</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+      </div>
 
-      if (!Array.isArray(todasReservas) || todasReservas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">Nenhuma solicitação registrada.</td></tr>';
-        return;
-      }
+      <p class="subtitle">
+        Reservas pendentes aparecem primeiro. Use os filtros acima para visualizar por tipo e status.
+      </p>
 
-      const filtroTipo = document.getElementById('filtroTipo').value;
-      const filtroStatus = document.getElementById('filtroStatus').value;
+      <div class="table-wrapper">
+        <table id="tabelaReservas">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Data / Período</th>
+              <th>Instituição / Contato</th>
+              <th>Finalidade / Observações</th>
+              <th>Anexo</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- linhas preenchidas via JS -->
+          </tbody>
+        </table>
+      </div>
 
-      const reservasFiltradas = todasReservas.filter(r => {
-        const tipo = (r.tipo_solicitacao || '').toUpperCase();
-        const st = (r.status || '').toUpperCase();
+    </section>
 
-        if (filtroTipo && tipo !== filtroTipo) return false;
-        if (filtroStatus && st !== filtroStatus) return false;
+    <!-- ABA 2: CHECKLISTS (NOVA) -->
+    <section id="secChecklists" class="panel card tab-section">
 
-        return true;
-      });
+      <div class="panel-top">
+        <div>
+          <h2 class="panel-title">Consulta de Check-IN / Check-OUT</h2>
+          <div class="info-analista">
+            Utilize os filtros abaixo para localizar registros de checklists.
+          </div>
+        </div>
+      </div>
 
-      if (reservasFiltradas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">Nenhuma solicitação com os filtros selecionados.</td></tr>';
-        return;
-      }
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="filtroIdReserva">ID da reserva:</label>
+          <input type="number" id="filtroIdReserva">
+        </div>
 
-      reservasFiltradas.forEach(r => {
-        const tr = document.createElement('tr');
+        <div class="filter-group">
+          <label for="filtroTipoSolicitacao">Tipo de solicitação:</label>
+          <select id="filtroTipoSolicitacao">
+            <option value="">Todos</option>
+            <option value="INTERNA">Interna</option>
+            <option value="EXTERNA">Externa</option>
+          </select>
+        </div>
 
-        const tdId = document.createElement('td');
-        tdId.textContent = r.id;
+        <div class="filter-group">
+          <label>Período da reserva:</label>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="date" id="filtroDataIni">
+            <span style="font-size:.75rem;">até</span>
+            <input type="date" id="filtroDataFim">
+          </div>
+        </div>
 
-        const tdData = document.createElement('td');
-        const periodoLabel = periodosPadrao[r.periodo] || r.periodo;
-        const dataIni = formatarDataISO(r.data_evento);
-        const dataFim = r.data_fim ? formatarDataISO(r.data_fim) : dataIni;
-        const textoData = dataIni === dataFim ? dataIni : `${dataIni} a ${dataFim}`;
-        tdData.innerHTML = `<strong>${textoData}</strong><br>${periodoLabel}`;
+        <div class="filter-group">
+          <label for="filtroConcordouUso">Concordou com uso (Check-IN):</label>
+          <select id="filtroConcordouUso">
+            <option value="">Todos</option>
+            <option value="SIM">Sim</option>
+            <option value="NAO">Não</option>
+          </select>
+        </div>
 
-        const tdInst = document.createElement('td');
-        const tipo = (r.tipo_solicitacao || '').toUpperCase();
-        const rotuloTipo = tipo === 'INTERNA' ? 'Interna (CBMES)' :
-                           tipo === 'EXTERNA' ? 'Externa' : '—';
-        tdInst.innerHTML = `
-          <strong>${r.instituicao}</strong><br>
-          <small>Tipo: ${rotuloTipo}</small><br>
-          ${r.responsavel}<br>
-          <small>${r.email}<br>${r.telefone}</small>
-        `;
+        <div class="filter-group">
+          <label for="filtroCheckoutAlteracoes">Check-OUT com alterações?</label>
+          <select id="filtroCheckoutAlteracoes">
+            <option value="">Todos</option>
+            <option value="SIM">Sim</option>
+            <option value="NAO">Não</option>
+          </select>
+        </div>
 
-        const tdFinalidade = document.createElement('td');
-        let textoFinal = `<strong>${r.finalidade}</strong>`;
-        if (r.observacoes) {
-          textoFinal += `<br><small>${r.observacoes}</small>`;
-        }
-        tdFinalidade.innerHTML = textoFinal;
+        <div class="filter-group">
+          <button type="button" id="btnBuscarChecklists" class="btn-header">
+            Buscar
+          </button>
+          <button type="button" id="btnLimparChecklists" class="btn-header btn-header-danger">
+            Limpar
+          </button>
+        </div>
+      </div>
 
-        const tdAnexo = document.createElement('td');
-        if (r.anexo_url) {
-          const link = document.createElement('a');
-          link.href = r.anexo_url;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.textContent = 'Ver anexo';
-          link.className = 'btn-link';
-          tdAnexo.appendChild(link);
-        } else {
-          tdAnexo.innerHTML = '<span style="font-size:.7rem;color:#999;">—</span>';
-        }
+      <p class="subtitle">
+        Os registros exibem se houve Check-IN, se houve concordância com as condições de uso
+        e se o Check-OUT foi realizado com alterações.
+      </p>
 
-        const tdStatus = document.createElement('td');
-        tdStatus.appendChild(criarStatusPill(r.status));
+      <div class="table-wrapper">
+        <table id="tabelaChecklists">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Data inicial</th>
+              <th>Data final</th>
+              <th>Tipo</th>
+              <th>Período</th>
+              <th>Instituição</th>
+              <th>Responsável</th>
+              <th>Check-IN</th>
+              <th>Concordou uso</th>
+              <th>Check-OUT</th>
+              <th>Com alterações?</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaChecklistsBody">
+            <tr>
+              <td colspan="11" style="text-align:center;font-size:.85rem;color:#666;">
+                Use os filtros acima e clique em "Buscar" para listar os registros.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        if (r.analisado_por) {
-          const small = document.createElement('div');
-          small.style.fontSize = '.65rem';
-          small.style.marginTop = '4px';
-
-          let txt = `Por: ${r.analisado_por}`;
-          if (r.analisado_email) {
-            txt += ` (${r.analisado_email})`;
-          }
-          if (r.data_decisao) {
-            txt += ` em ${formatarDataISO(r.data_decisao)}`;
-          }
-
-          small.textContent = txt;
-          tdStatus.appendChild(small);
-        }
+    </section>
 
 
-        if (r.motivo_decisao) {
-          const m = document.createElement('div');
-          m.style.fontSize = '.65rem';
-          m.style.marginTop = '2px';
-          m.style.color = '#555';
-          m.textContent = `Motivo: ${r.motivo_decisao}`;
-          tdStatus.appendChild(m);
-        }
+    <!-- ABA 3: USUÁRIOS (NOVA) -->
+    <section id="secUsuarios" class="panel card tab-section">
+      <div class="panel-top">
+        <div>
+          <h2 class="panel-title">Gestão de usuários internos</h2>
+          <div class="info-analista">
+            Somente administradores podem cadastrar e gerenciar usuários.
+          </div>
+        </div>
+      </div>
 
-        const tdAcoes = document.createElement('td');
-        const statusUpper = (r.status || '').toUpperCase();
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="usuarioNome">Nome:</label>
+          <input type="text" id="usuarioNome">
+        </div>
+        <div class="filter-group">
+          <label for="usuarioEmail">E-mail de login:</label>
+          <input type="email" id="usuarioEmail">
+        </div>
+        <div class="filter-group">
+          <label for="usuarioSenha">Senha:</label>
+          <input type="password" id="usuarioSenha" placeholder="Para edição, deixe em branco para manter">
+        </div>
+        <div class="filter-group">
+          <label><input type="checkbox" id="usuarioAdmin"> Administrador</label><br>
+          <label><input type="checkbox" id="usuarioAtivo" checked> Ativo</label>
+        </div>
+        <div class="form-group">
+          <label for="userEscopo">Escopo de atuação</label>
+          <select id="userEscopo" name="tipo_escopo" required>
+            <option value="AMBOS">Ambos (Interna e Externa)</option>
+            <option value="INTERNA">Somente Interna</option>
+            <option value="EXTERNA">Somente Externa</option>
+          </select>
+        </div>
 
-        if (statusUpper === 'PENDENTE') {
-          const btnAprovar = document.createElement('button');
-          btnAprovar.className = 'btn btn-aprovar';
-          btnAprovar.textContent = 'Aprovar';
-          btnAprovar.addEventListener('click', () => atualizarStatus(r.id, 'APROVADA'));
+        <div class="filter-group">
+          <button type="button" id="btnSalvarUsuario" class="btn-header">Salvar</button>
+          <button type="button" id="btnNovoUsuario" class="btn-header btn-header-danger">Novo</button>
+        </div>
 
-          const btnNegar = document.createElement('button');
-          btnNegar.className = 'btn btn-negar';
-          btnNegar.textContent = 'Negar';
-          btnNegar.addEventListener('click', () => atualizarStatus(r.id, 'NEGADA'));
+      </div>
 
-          tdAcoes.appendChild(btnAprovar);
-          tdAcoes.appendChild(btnNegar);
-        } else if (statusUpper === 'APROVADA') {
-          const btnCancelar = document.createElement('button');
-          btnCancelar.className = 'btn btn-negar';
-          btnCancelar.textContent = 'Cancelar';
-          btnCancelar.addEventListener('click', () => atualizarStatus(r.id, 'CANCELADA'));
-          tdAcoes.appendChild(btnCancelar);
-        } else {
-          tdAcoes.textContent = '-';
-        }
+      <div class="table-wrapper">
+        <table id="tabelaUsuarios">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Escopo</th>
+              <th>Admin</th>
+              <th>Ativo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaUsuariosBody">
+            <tr>
+              <td colspan="6" style="text-align:center;font-size:.85rem;color:#666;">
+                Nenhum usuário carregado ainda.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-        tr.appendChild(tdId);
-        tr.appendChild(tdData);
-        tr.appendChild(tdInst);
-        tr.appendChild(tdFinalidade);
-        tr.appendChild(tdAnexo);
-        tr.appendChild(tdStatus);
-        tr.appendChild(tdAcoes);
+  <!-- CONTAINER DO MODAL -->
+  <div id="modalTransformarUso" class="modal-backdrop"></div>
 
-        tbody.appendChild(tr);
-      });
-    }
 
-    async function carregarReservas() {
-      const tbody = document.querySelector('#tabelaReservas tbody');
-      tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
+  <!-- Script para alternar abas -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const sections = document.querySelectorAll('.tab-section');
 
-      try {
-        const resp = await fetch(`${API_BASE}/reservas`);
-        if (resp.status === 401) {
-          window.location.href = '/login.html';
-          return;
-        }
-        const reservas = await resp.json();
-        todasReservas = Array.isArray(reservas) ? reservas : [];
-        renderTabela();
-      } catch (err) {
-        console.error(err);
-        tbody.innerHTML = '<tr><td colspan="7">Erro ao carregar dados.</td></tr>';
-      }
-    }
+      tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const targetId = btn.getAttribute('data-target');
 
-    async function atualizarStatus(id, novoStatus) {
-      let motivo = '';
-      const st = novoStatus.toUpperCase();
+          tabButtons.forEach(b => b.classList.remove('active'));
+          sections.forEach(sec => sec.classList.remove('active'));
 
-      if (st === 'NEGADA' || st === 'CANCELADA') {
-        const textoAcao = st === 'NEGADA' ? 'negativa' : 'cancelamento';
-        const msgObrigatorio = st === 'NEGADA'
-          ? 'Para negar uma solicitação é obrigatório informar o motivo.'
-          : 'Para cancelar uma reserva é obrigatório informar o motivo.';
-
-        while (true) {
-          const resposta = prompt(`Informe o motivo da ${textoAcao} (será registrado na base):`);
-          if (resposta === null) {
-            return;
-          }
-          if (resposta.trim() === '') {
-            alert(msgObrigatorio);
-            continue;
-          }
-          motivo = resposta.trim();
-          break;
-        }
-      }
-
-      if (!confirm(`Confirma alterar o status da reserva ${id} para ${st}?`)) {
-        return;
-      }
-
-      try {
-        const resp = await fetch(`${API_BASE}/reservas/${id}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            status: st,
-            motivo_decisao: motivo
-          })
+          btn.classList.add('active');
+          const sec = document.getElementById(targetId);
+          if (sec) sec.classList.add('active');
         });
-
-        const resJson = await resp.json();
-
-        if (resp.status === 401) {
-          alert('Sessão expirada. Faça login novamente.');
-          window.location.href = '/login.html';
-          return;
-        }
-
-        if (!resp.ok) {
-          alert(resJson.error || 'Erro ao atualizar status da reserva.');
-          return;
-        }
-
-        alert('Status atualizado com sucesso!');
-        carregarReservas();
-      } catch (err) {
-        console.error(err);
-        alert('Erro de comunicação com o servidor.');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const infoUsuario = document.getElementById('infoUsuario');
-      const btnLogout   = document.getElementById('btnLogout');
-      const filtroTipo  = document.getElementById('filtroTipo');
-      const filtroStatus= document.getElementById('filtroStatus');
-
-      // Verifica usuário logado e só então carrega as reservas
-      (async function init() {
-        try {
-          const resp = await fetch('/api/me');
-          if (resp.status === 401) {
-            window.location.href = '/login.html';
-            return;
-          }
-          const user = await resp.json();
-          infoUsuario.textContent = `Você está logado como: ${user.nome} (${user.email})`;
-          await carregarReservas();
-        } catch (err) {
-          console.error('Erro ao verificar login', err);
-          alert('Erro ao verificar usuário logado. Você será redirecionado.');
-          window.location.href = '/login.html';
-        }
-      })();
-
-      filtroTipo.addEventListener('change', renderTabela);
-      filtroStatus.addEventListener('change', renderTabela);
-
-      const btnAlterarSenha = document.getElementById('btnAlterarSenha');
-        btnAlterarSenha.addEventListener('click', () => {
-          window.location.href = '/alterar-senha.html';
-        });
-
-
-      btnLogout.addEventListener('click', async () => {
-        try {
-          await fetch('/api/logout', { method: 'POST' });
-        } catch (_) {}
-        window.location.href = '/login.html';
       });
     });
-</script>
+  </script>
+
+  <script src="js/admin.js"></script>
 </body>
+
 </html>

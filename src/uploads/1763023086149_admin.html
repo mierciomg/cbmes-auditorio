@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>CBMES – Painel Interno do Auditório</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+          --cbmes-red: #c71c22;
+          --bg: #f4f5f7;
+          --surface: #ffffff;
+          --shadow: 0 10px 30px rgba(0,0,0,.08);
+          --radius: 14px;
+        }
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+          background: var(--bg);
+          color: #222;
+        }
+        header {
+          background: linear-gradient(120deg, #1f2430, #3a4153);
+          color: #fff;
+          padding: 14px 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        header h1 { margin: 0; font-size: 1rem; }
+        header small { font-size: .7rem; opacity: .8; display:block; }
+        .tag {
+          background: rgba(0,0,0,.3);
+          padding: 4px 10px;
+          border-radius: 999px;
+          font-size: .7rem;
+        }
+        main {
+          padding: 20px;
+          max-width: 1150px;
+          margin: 0 auto;
+        }
+        .card {
+          background: var(--surface);
+          border-radius: var(--radius);
+          box-shadow: var(--shadow);
+          padding: 16px 18px 18px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: .78rem;
+        }
+        th, td {
+          border-bottom: 1px solid #eee;
+          padding: 6px 8px;
+          text-align: left;
+          vertical-align: top;
+        }
+        th {
+          background: #f5f6fb;
+          font-weight: 600;
+          position: sticky;
+          top: 0;
+          z-index: 1;
+        }
+        tr:nth-child(even) td { background: #fafbff; }
+
+        .status-pill {
+          display: inline-block;
+          padding: 2px 8px;
+          border-radius: 999px;
+          font-size: .7rem;
+          font-weight: 600;
+        }
+        .st-pendente { background: #fff6e5; color: #a86f00; }
+        .st-aprovada { background: #e7f8e7; color: #217c3f; }
+        .st-negada  { background: #fde7e7; color: #9e1c1c; }
+        .st-cancelada { background: #e5ecff; color: #274b8f; }
+
+        .btn {
+          border: none;
+          border-radius: 999px;
+          padding: 4px 10px;
+          font-size: .7rem;
+          cursor: pointer;
+          margin-right: 4px;
+        }
+        .btn-aprovar { background: #1bbd6d; color: #fff; }
+        .btn-negar   { background: #e65454; color: #fff; }
+        .btn-link {
+          border-radius: 999px;
+          padding: 3px 8px;
+          font-size: .7rem;
+          border: 1px solid #ccc;
+          background: #fff;
+          cursor: pointer;
+        }
+
+        .top-bar {
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          margin-bottom:8px;
+          flex-wrap:wrap;
+        }
+        .info-analista {
+          font-size:.7rem;
+          color:#444;
+        }
+        .subtitle {
+          font-size:.75rem;
+          color:#666;
+          margin-bottom:4px;
+        }
+
+        .filter-bar {
+          display:flex;
+          gap:8px;
+          flex-wrap:wrap;
+          margin-top:6px;
+          margin-bottom:4px;
+        }
+        .filter-bar label {
+          font-size:.7rem;
+          font-weight:600;
+          margin-right:4px;
+        }
+        .filter-group {
+          display:flex;
+          align-items:center;
+          gap:4px;
+        }
+        .filter-bar select {
+          padding: 5px 8px;
+          border-radius: 999px;
+          border: 1px solid #ccd1db;
+          font-size: .75rem;
+          background:#fff;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>Painel Interno – Agendamento do Auditório</h1>
+        <small>Corpo de Bombeiros Militar do Espírito Santo – CAT / QCG</small>
+    </div>
+    <div class="tag">Uso restrito a pessoal autorizado</div>
+</header>
+
+<main>
+    <div class="card">
+        <div class="top-bar">
+            <div>
+                <p style="margin:0;">
+                    <strong>Solicitações de uso do auditório</strong><br>
+                    <span class="info-analista" id="infoUsuario">
+        Verificando usuário logado...
+      </span>
+                </p>
+            </div>
+            <div>
+                <button class="btn-link" id="btnAlterarSenha">Alterar senha</button>
+                <button class="btn-link" id="btnLogout">Sair</button>
+            </div>
+        </div>
+
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="filtroTipo">Tipo de solicitação:</label>
+                <select id="filtroTipo">
+                    <option value="">Todos</option>
+                    <option value="INTERNA">Interna (CBMES)</option>
+                    <option value="EXTERNA">Externa</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filtroStatus">Status:</label>
+                <select id="filtroStatus">
+                    <option value="">Todos</option>
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="APROVADA">Aprovada</option>
+                    <option value="NEGADA">Negada</option>
+                    <option value="CANCELADA">Cancelada</option>
+                </select>
+            </div>
+        </div>
+
+        <p class="subtitle">
+            Pendentes aparecem primeiro. Use os filtros acima para visualizar por tipo e status.
+        </p>
+
+        <div style="max-height:65vh;overflow:auto;margin-top:10px;">
+            <table id="tabelaReservas">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Data / Período</th>
+                    <th>Instituição / Contato</th>
+                    <th>Finalidade / Observações</th>
+                    <th>Anexo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- linhas via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    const API_BASE = '/api';
+    const periodosPadrao = {
+      INTEGRAL: 'Integral (08h às 18h)',
+      MANHA:    'Manhã (08h às 12h)',
+      TARDE:    'Tarde (13h às 17h)',
+      NOITE:    'Noite (18h às 21h)'
+    };
+
+    let todasReservas = [];
+
+    function formatarDataISO(iso) {
+      if (!iso) return '';
+      return iso.slice(0,10).split('-').reverse().join('/');
+    }
+
+    function criarStatusPill(status) {
+      const span = document.createElement('span');
+      span.classList.add('status-pill');
+      const st = (status || '').toUpperCase();
+      if (st === 'PENDENTE')  span.classList.add('st-pendente');
+      if (st === 'APROVADA')  span.classList.add('st-aprovada');
+      if (st === 'NEGADA')    span.classList.add('st-negada');
+      if (st === 'CANCELADA') span.classList.add('st-cancelada');
+      span.textContent = st || '---';
+      return span;
+    }
+
+    function renderTabela() {
+      const tbody = document.querySelector('#tabelaReservas tbody');
+      tbody.innerHTML = '';
+
+      if (!Array.isArray(todasReservas) || todasReservas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">Nenhuma solicitação registrada.</td></tr>';
+        return;
+      }
+
+      const filtroTipo = document.getElementById('filtroTipo').value;
+      const filtroStatus = document.getElementById('filtroStatus').value;
+
+      const reservasFiltradas = todasReservas.filter(r => {
+        const tipo = (r.tipo_solicitacao || '').toUpperCase();
+        const st = (r.status || '').toUpperCase();
+
+        if (filtroTipo && tipo !== filtroTipo) return false;
+        if (filtroStatus && st !== filtroStatus) return false;
+
+        return true;
+      });
+
+      if (reservasFiltradas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">Nenhuma solicitação com os filtros selecionados.</td></tr>';
+        return;
+      }
+
+      reservasFiltradas.forEach(r => {
+        const tr = document.createElement('tr');
+
+        const tdId = document.createElement('td');
+        tdId.textContent = r.id;
+
+        const tdData = document.createElement('td');
+        const periodoLabel = periodosPadrao[r.periodo] || r.periodo;
+        const dataIni = formatarDataISO(r.data_evento);
+        const dataFim = r.data_fim ? formatarDataISO(r.data_fim) : dataIni;
+        const textoData = dataIni === dataFim ? dataIni : `${dataIni} a ${dataFim}`;
+        tdData.innerHTML = `<strong>${textoData}</strong><br>${periodoLabel}`;
+
+        const tdInst = document.createElement('td');
+        const tipo = (r.tipo_solicitacao || '').toUpperCase();
+        const rotuloTipo = tipo === 'INTERNA' ? 'Interna (CBMES)' :
+                           tipo === 'EXTERNA' ? 'Externa' : '—';
+        tdInst.innerHTML = `
+          <strong>${r.instituicao}</strong><br>
+          <small>Tipo: ${rotuloTipo}</small><br>
+          ${r.responsavel}<br>
+          <small>${r.email}<br>${r.telefone}</small>
+        `;
+
+        const tdFinalidade = document.createElement('td');
+        let textoFinal = `<strong>${r.finalidade}</strong>`;
+        if (r.observacoes) {
+          textoFinal += `<br><small>${r.observacoes}</small>`;
+        }
+        tdFinalidade.innerHTML = textoFinal;
+
+        const tdAnexo = document.createElement('td');
+        if (r.anexo_url) {
+          const link = document.createElement('a');
+          link.href = r.anexo_url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Ver anexo';
+          link.className = 'btn-link';
+          tdAnexo.appendChild(link);
+        } else {
+          tdAnexo.innerHTML = '<span style="font-size:.7rem;color:#999;">—</span>';
+        }
+
+        const tdStatus = document.createElement('td');
+        tdStatus.appendChild(criarStatusPill(r.status));
+
+        if (r.analisado_por) {
+          const small = document.createElement('div');
+          small.style.fontSize = '.65rem';
+          small.style.marginTop = '4px';
+
+          let txt = `Por: ${r.analisado_por}`;
+          if (r.analisado_email) {
+            txt += ` (${r.analisado_email})`;
+          }
+          if (r.data_decisao) {
+            txt += ` em ${formatarDataISO(r.data_decisao)}`;
+          }
+
+          small.textContent = txt;
+          tdStatus.appendChild(small);
+        }
+
+
+        if (r.motivo_decisao) {
+          const m = document.createElement('div');
+          m.style.fontSize = '.65rem';
+          m.style.marginTop = '2px';
+          m.style.color = '#555';
+          m.textContent = `Motivo: ${r.motivo_decisao}`;
+          tdStatus.appendChild(m);
+        }
+
+        const tdAcoes = document.createElement('td');
+        const statusUpper = (r.status || '').toUpperCase();
+
+        if (statusUpper === 'PENDENTE') {
+          const btnAprovar = document.createElement('button');
+          btnAprovar.className = 'btn btn-aprovar';
+          btnAprovar.textContent = 'Aprovar';
+          btnAprovar.addEventListener('click', () => atualizarStatus(r.id, 'APROVADA'));
+
+          const btnNegar = document.createElement('button');
+          btnNegar.className = 'btn btn-negar';
+          btnNegar.textContent = 'Negar';
+          btnNegar.addEventListener('click', () => atualizarStatus(r.id, 'NEGADA'));
+
+          tdAcoes.appendChild(btnAprovar);
+          tdAcoes.appendChild(btnNegar);
+        } else if (statusUpper === 'APROVADA') {
+          const btnCancelar = document.createElement('button');
+          btnCancelar.className = 'btn btn-negar';
+          btnCancelar.textContent = 'Cancelar';
+          btnCancelar.addEventListener('click', () => atualizarStatus(r.id, 'CANCELADA'));
+          tdAcoes.appendChild(btnCancelar);
+        } else {
+          tdAcoes.textContent = '-';
+        }
+
+        tr.appendChild(tdId);
+        tr.appendChild(tdData);
+        tr.appendChild(tdInst);
+        tr.appendChild(tdFinalidade);
+        tr.appendChild(tdAnexo);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdAcoes);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function carregarReservas() {
+      const tbody = document.querySelector('#tabelaReservas tbody');
+      tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
+
+      try {
+        const resp = await fetch(`${API_BASE}/reservas`);
+        if (resp.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const reservas = await resp.json();
+        todasReservas = Array.isArray(reservas) ? reservas : [];
+        renderTabela();
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = '<tr><td colspan="7">Erro ao carregar dados.</td></tr>';
+      }
+    }
+
+    async function atualizarStatus(id, novoStatus) {
+      let motivo = '';
+      const st = novoStatus.toUpperCase();
+
+      if (st === 'NEGADA' || st === 'CANCELADA') {
+        const textoAcao = st === 'NEGADA' ? 'negativa' : 'cancelamento';
+        const msgObrigatorio = st === 'NEGADA'
+          ? 'Para negar uma solicitação é obrigatório informar o motivo.'
+          : 'Para cancelar uma reserva é obrigatório informar o motivo.';
+
+        while (true) {
+          const resposta = prompt(`Informe o motivo da ${textoAcao} (será registrado na base):`);
+          if (resposta === null) {
+            return;
+          }
+          if (resposta.trim() === '') {
+            alert(msgObrigatorio);
+            continue;
+          }
+          motivo = resposta.trim();
+          break;
+        }
+      }
+
+      if (!confirm(`Confirma alterar o status da reserva ${id} para ${st}?`)) {
+        return;
+      }
+
+      try {
+        const resp = await fetch(`${API_BASE}/reservas/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status: st,
+            motivo_decisao: motivo
+          })
+        });
+
+        const resJson = await resp.json();
+
+        if (resp.status === 401) {
+          alert('Sessão expirada. Faça login novamente.');
+          window.location.href = '/login.html';
+          return;
+        }
+
+        if (!resp.ok) {
+          alert(resJson.error || 'Erro ao atualizar status da reserva.');
+          return;
+        }
+
+        alert('Status atualizado com sucesso!');
+        carregarReservas();
+      } catch (err) {
+        console.error(err);
+        alert('Erro de comunicação com o servidor.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const infoUsuario = document.getElementById('infoUsuario');
+      const btnLogout   = document.getElementById('btnLogout');
+      const filtroTipo  = document.getElementById('filtroTipo');
+      const filtroStatus= document.getElementById('filtroStatus');
+
+      // Verifica usuário logado e só então carrega as reservas
+      (async function init() {
+        try {
+          const resp = await fetch('/api/me');
+          if (resp.status === 401) {
+            window.location.href = '/login.html';
+            return;
+          }
+          const user = await resp.json();
+          infoUsuario.textContent = `Você está logado como: ${user.nome} (${user.email})`;
+          await carregarReservas();
+        } catch (err) {
+          console.error('Erro ao verificar login', err);
+          alert('Erro ao verificar usuário logado. Você será redirecionado.');
+          window.location.href = '/login.html';
+        }
+      })();
+
+      filtroTipo.addEventListener('change', renderTabela);
+      filtroStatus.addEventListener('change', renderTabela);
+
+      const btnAlterarSenha = document.getElementById('btnAlterarSenha');
+        btnAlterarSenha.addEventListener('click', () => {
+          window.location.href = '/alterar-senha.html';
+        });
+
+
+      btnLogout.addEventListener('click', async () => {
+        try {
+          await fetch('/api/logout', { method: 'POST' });
+        } catch (_) {}
+        window.location.href = '/login.html';
+      });
+    });
+</script>
+</body>
+</html>

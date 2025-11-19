@@ -2,155 +2,55 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Alterar senha – Auditório CBMES</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        body {
-          margin:0;
-          font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-          background:#f4f5f7;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          min-height:100vh;
-        }
-        .card {
-          background:#fff;
-          padding:24px 26px 22px;
-          border-radius:14px;
-          box-shadow:0 10px 35px rgba(0,0,0,.1);
-          max-width:380px;
-          width:100%;
-        }
-        h1 { margin:0 0 4px; font-size:1rem; }
-        p { margin:0 0 14px; font-size:.8rem; color:#555; }
-        label { font-size:.75rem; font-weight:600; }
-        input {
-          width:100%;
-          padding:7px 9px;
-          border-radius:8px;
-          border:1px solid #ccd1db;
-          font-size:.8rem;
-        }
-        .form-group { margin-bottom:10px; display:flex; flex-direction:column; gap:4px; }
-        button {
-          width:100%;
-          border:none;
-          padding:9px 0;
-          border-radius:999px;
-          background:#c71c22;
-          color:#fff;
-          font-weight:600;
-          cursor:pointer;
-          margin-top:4px;
-        }
-        .msg {
-          font-size:.75rem;
-          margin-bottom:8px;
-          display:none;
-        }
-        .msg.ok { color:#1e7a3b; }
-        .msg.erro { color:#c71c22; }
-        .link-btn {
-          border:none;
-          background:none;
-          padding:0;
-          margin-top:8px;
-          font-size:.75rem;
-          color:#333;
-          cursor:pointer;
-          text-decoration:underline;
-        }
-    </style>
+    <title>Alterar senha – Painel do Auditório CBMES</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="css/alterar-senha.css">
 </head>
 <body>
-<div class="card">
-    <h1>Alterar senha</h1>
-    <p>Informe a senha atual e escolha uma nova senha de acesso.</p>
 
-    <div class="msg" id="msg"></div>
+<div class="page-wrapper">
+    <div class="card">
 
-    <form id="formAlterar">
-        <div class="form-group">
-            <label>Senha atual</label>
-            <input type="password" name="senha_atual" required />
-        </div>
-        <div class="form-group">
-            <label>Nova senha</label>
-            <input type="password" name="nova_senha" required minlength="6" />
-        </div>
-        <div class="form-group">
-            <label>Confirmar nova senha</label>
-            <input type="password" name="confirma_senha" required minlength="6" />
-        </div>
-        <button type="submit">Atualizar senha</button>
-    </form>
+        <h1 class="titulo">Alterar senha</h1>
+        <p class="subtitulo">
+            Informe sua senha atual e defina uma nova senha para acessar o painel interno.
+        </p>
 
-    <button type="button" class="link-btn" id="btnVoltar">Voltar ao painel</button>
+        <div class="alerta erro" id="msgErro"></div>
+        <div class="alerta sucesso" id="msgSucesso"></div>
+
+        <form id="formAlterarSenha" class="form-grid">
+            <div class="form-group">
+                <label for="senhaAtual">Senha atual</label>
+                <input type="password" id="senhaAtual" name="senha_atual" required autocomplete="current-password">
+            </div>
+
+            <div class="form-group">
+                <label for="novaSenha">Nova senha</label>
+                <input type="password" id="novaSenha" name="nova_senha" required autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmaSenha">Confirmar nova senha</label>
+                <input type="password" id="confirmaSenha" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-primario">Salvar nova senha</button>
+        </form>
+
+        <button type="button" class="btn-link" id="btnVoltar">
+            ⟵ Voltar para a página inicial
+        </button>
+
+        <button type="button" class="btn-link" id="btnPortalInterno">
+            ⟵ Voltar para o portal interno
+        </button>
+
+
+    </div>
 </div>
 
-<script>
-    // garante que está logado
-    fetch('/api/me').then(resp => {
-      if (resp.status === 401) {
-        window.location.href = '/login.html';
-      }
-    });
-
-    document.getElementById('formAlterar').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const msg = document.getElementById('msg');
-      msg.style.display = 'none';
-
-      const atu = form.senha_atual.value;
-      const nova = form.nova_senha.value;
-      const conf = form.confirma_senha.value;
-
-      if (nova !== conf) {
-        msg.textContent = 'A confirmação da senha não confere.';
-        msg.className = 'msg erro';
-        msg.style.display = 'block';
-        return;
-      }
-
-      try {
-        const resp = await fetch('/api/alterar-senha', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ senha_atual: atu, nova_senha: nova })
-        });
-
-        const json = await resp.json();
-
-        if (!resp.ok) {
-          msg.textContent = json.error || 'Erro ao alterar senha.';
-          msg.className = 'msg erro';
-          msg.style.display = 'block';
-          return;
-        }
-
-        msg.textContent = 'Senha alterada com sucesso! Você precisará fazer login novamente.';
-        msg.className = 'msg ok';
-        msg.style.display = 'block';
-        form.reset();
-
-        // opcional: deslogar depois de alguns segundos
-        setTimeout(async () => {
-          await fetch('/api/logout', { method: 'POST' });
-          window.location.href = '/login.html';
-        }, 2000);
-      } catch (err) {
-        console.error(err);
-        msg.textContent = 'Erro de comunicação com o servidor.';
-        msg.className = 'msg erro';
-        msg.style.display = 'block';
-      }
-    });
-
-    document.getElementById('btnVoltar').addEventListener('click', () => {
-      window.location.href = '/admin.html';
-    });
-</script>
+<script src="js/alterar-senha.js"></script>
 </body>
 </html>

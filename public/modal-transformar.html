@@ -1,0 +1,77 @@
+<div class="modal-card">
+  <h2>Transformar "Em uso da Corporação" em reserva</h2>
+
+  <form id="formTransformarUso" class="modal-form">
+    <div class="form-group">
+      <label>Tipo de solicitação *</label>
+      <select id="tf_tipo" required>
+        <option value="INTERNA">Interna (CBMES)</option>
+        <option value="EXTERNA">Externa</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Órgão / Instituição solicitante *</label>
+      <input id="tf_instituicao" required>
+    </div>
+
+    <div class="form-group">
+      <label>Responsável *</label>
+      <input id="tf_responsavel" required>
+    </div>
+
+    <div class="form-group">
+      <label>E-mail *</label>
+      <input id="tf_email" type="email" required>
+    </div>
+
+    <div class="form-group">
+      <label>Telefone / WhatsApp *</label>
+      <input id="tf_telefone" required>
+    </div>
+
+    <div class="form-group">
+      <label>Data inicial *</label>
+      <input type="date" id="tf_dataInicio" required>
+    </div>
+
+    <div class="form-group">
+      <label>Data final *</label>
+      <input type="date" id="tf_dataFim" required>
+    </div>
+
+    <div class="form-group">
+      <label>Período *</label>
+      <select id="tf_periodo" required>
+        <option value="MANHA">Manhã</option>
+        <option value="TARDE">Tarde</option>
+        <option value="NOITE">Noite</option>
+        <option value="INTEGRAL">Integral</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Finalidade do evento *</label>
+      <select id="tf_finalidade" name="finalidade" required>
+        <option value="">Selecione</option>
+        <option value="Reunião interna CBMES">Reunião interna CBMES</option>
+        <option value="Reunião entre órgãos">Reunião entre órgãos</option>
+        <option value="Treinamento / Curso">Treinamento / Curso</option>
+        <option value="Palestra / Seminário">Palestra / Seminário</option>
+        <option value="Cerimônia / Solenidade">Cerimônia / Solenidade</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+
+
+    <div class="form-group full">
+      <label>Observações</label>
+      <textarea id="tf_observacoes"></textarea>
+    </div>
+
+    <div class="actions full">
+      <button type="button" id="btnCancelarTransformar" class="btn btn-negar">Cancelar</button>
+      <button type="submit" id="btnSalvarTransformar" class="btn btn-aprovar">Salvar</button>
+    </div>
+  </form>
+</div>

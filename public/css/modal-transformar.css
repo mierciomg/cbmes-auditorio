@@ -1,0 +1,132 @@
+/* ===== BACKDROP ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+
+  /* ANIMAÇÃO */
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+.modal-backdrop.show {
+  display: flex;
+  opacity: 1;
+}
+
+/* ===== CARD ===== */
+.modal-card {
+  background: #fff;
+  padding: 28px;
+  border-radius: 18px;
+  width: 95%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 22px 55px rgba(0,0,0,.22);
+
+  /* ANIMAÇÃO */
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all .30s ease;
+}
+
+.modal-backdrop.show .modal-card {
+  transform: translateY(0px);
+  opacity: 1;
+}
+
+/* ===== TITULO ===== */
+.modal-card h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* ===== FORM ===== */
+.modal-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.modal-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-form .form-group.full {
+  grid-column: 1 / -1;
+}
+
+.modal-form label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d0d7e2;
+  background: #f8fafc;
+  font-size: 0.95rem;
+}
+
+.modal-form textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ===== AÇÕES ===== */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-negar {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-aprovar {
+  background: #10b981;
+  color: #fff;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .modal-card {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .modal-form {
+    grid-template-columns: 1fr;
+  }
+}
