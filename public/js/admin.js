@@ -365,13 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const obsUpper = (r.observacoes || '').toUpperCase();
 
       // "Em uso da Corporação": identificado pela finalidade ou observações
+      // Normalize finalidade e observações
+      const finalidadeNorm = (r.finalidade || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const obsNorm = (r.observacoes || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      // Detectar uso da corporação de forma segura
       const isUsoCorporacao =
         statusUpper === 'APROVADA' &&
         tipoUpper === 'INTERNA' &&
         (
-          finalidadeUpper.includes('EM USO DA CORPORAÇÃO') ||
-          obsUpper.includes('EM USO DA CORPORAÇÃO')
+          finalidadeNorm.includes('EM USO DA CORPORACAO') ||
+          obsNorm.includes('EM USO DA CORPORACAO')
         );
+
 
       if (statusUpper === 'PENDENTE') {
         const btnAprovar = document.createElement('button');

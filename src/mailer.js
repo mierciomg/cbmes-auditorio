@@ -31,6 +31,10 @@ function layoutBase(conteudo) {
 // 1) Email – Nova solicitação recebida
 // ======================================================
 async function enviarEmailNovaReserva(reserva) {
+  console.log('[MAILER] Disparando e-mail de nova reserva para', reserva.email);
+
+  const inicio = Date.now();
+
   const conteudo = `
     <p>Prezado(a) <strong>${reserva.responsavel}</strong>,</p>
     
@@ -49,11 +53,22 @@ async function enviarEmailNovaReserva(reserva) {
     <p>Você receberá novo e-mail assim que a solicitação for analisada.</p>
   `;
 
-  await enviarEmail({
-    to: reserva.email,
-    subject: 'Solicitação registrada – Auditório CBMES',
-    html: layoutBase(conteudo),
-  });
+  try {
+    await enviarEmail({
+      to: reserva.email,
+      subject: 'Solicitação registrada – Auditório CBMES',
+      html: layoutBase(conteudo),
+    });
+
+    console.log(
+      '[MAILER] E-mail de nova reserva enviado com sucesso em',
+      Date.now() - inicio,
+      'ms'
+    );
+  } catch (err) {
+    console.error('[MAILER] ERRO ao enviar e-mail de nova reserva:', err);
+    throw err; // deixa o erro subir para cair no .catch do controller
+  }
 }
 
 // ======================================================
