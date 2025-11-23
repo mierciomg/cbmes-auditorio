@@ -167,6 +167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       payload[key] = value;
     }
 
+    payload.checkout_com_alteracoes = confirmacao === 'COM_ALTERACOES';
+
     try {
       const resp = await fetch(`${API_BASE}/checklist/${token}?tipo=CHECKOUT`, {
         method: 'POST',
