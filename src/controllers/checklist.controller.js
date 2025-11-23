@@ -211,13 +211,9 @@ exports.responderChecklist = async (req, res) => {
         [novoJson, token]
       );
     } else {
-      // ==========================
-      // CHECKOUT
-      // ==========================
-
       novoJson = { ...base, checkout: payload };
 
-      // 1º UPDATE: mantém o comportamento antigo (que já funcionava)
+      // 1º UPDATE: salva respostas e data/hora (comportamento que já funcionava)
       await db.query(
         `
         UPDATE auditorio_reserva
@@ -228,25 +224,18 @@ exports.responderChecklist = async (req, res) => {
         [novoJson, token]
       );
 
-      // 2º UPDATE: tenta atualizar a flag checkout_com_alteracoes, mas sem quebrar nada se falhar
+      // 2º UPDATE: flag de "com alterações?"
       try {
         let houveAlteracoes = false;
 
-        const brutoAlteracoes =
-          payload.checkout_com_alteracoes ??
-          payload.checkout_alteracoes ??
-          payload.houve_alteracoes ??
-          payload.alteracoes;
+        // vem do radio final de confirmação
+        const confVal = String(payload.confirmacao_checkout || '')
+          .trim()
+          .toUpperCase();
 
-        if (typeof brutoAlteracoes === 'string') {
-          const v = brutoAlteracoes.trim().toUpperCase();
-          if (['SIM', 'S', 'TRUE', '1'].includes(v)) {
-            houveAlteracoes = true;
-          }
-        } else if (typeof brutoAlteracoes === 'boolean') {
-          houveAlteracoes = brutoAlteracoes;
-        } else if (typeof brutoAlteracoes === 'number') {
-          houveAlteracoes = brutoAlteracoes === 1;
+        // Se o valor tiver "COM" (COM_ALTERACOES, COM-ALTERACOES, etc) consideramos true
+        if (confVal.includes('COM')) {
+          houveAlteracoes = true;
         }
 
         await db.query(
@@ -262,7 +251,6 @@ exports.responderChecklist = async (req, res) => {
           'Não foi possível atualizar checkout_com_alteracoes (mas o checklist foi salvo):',
           errFlag
         );
-        // não dou throw: o checklist continua salvo normalmente
       }
     }
 
