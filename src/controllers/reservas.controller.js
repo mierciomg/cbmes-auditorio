@@ -571,14 +571,14 @@ exports.transformarUsoCorporacaoEmReserva = async (req, res) => {
 
 
 
-// ================== LISTA DE CHECKLISTS (CHECK-IN / CHECK-OUT) ===============
+// ================== LISTA DE CHECKLISTS (ABA CHECKLISTS) ===============
 exports.listarChecklists = async (req, res) => {
   try {
     const {
       id,                 // opcional - id da reserva
       tipo_solicitacao,   // INTERNA / EXTERNA
-      data_ini,           // filtro de período - data inicial
-      data_fim,           // filtro de período - data final
+      data_ini,           // filtro de período - data inicial (YYYY-MM-DD)
+      data_fim,           // filtro de período - data final   (YYYY-MM-DD)
       concordou_uso,      // SIM / NAO (check-in)
       checkout_alteracoes // SIM / NAO (check-out com alterações)
     } = req.query;
@@ -586,16 +586,19 @@ exports.listarChecklists = async (req, res) => {
     const params = [];
     const where = [];
 
+    // Filtro por ID
     if (id) {
       params.push(Number(id));
       where.push(`id = $${params.length}`);
     }
 
+    // Filtro por tipo de solicitação
     if (tipo_solicitacao) {
       params.push(tipo_solicitacao.toUpperCase());
       where.push(`tipo_solicitacao = $${params.length}`);
     }
 
+    // Período (data_evento / data_fim)
     if (data_ini) {
       params.push(data_ini);
       where.push(`data_evento >= $${params.length}`);
@@ -606,30 +609,18 @@ exports.listarChecklists = async (req, res) => {
       where.push(`COALESCE(data_fim, data_evento) <= $${params.length}`);
     }
 
-    // Filtro: concordou uso do auditório (CHECK-IN)
+    // Filtro: concordou uso do auditório no CHECK-IN
     if (concordou_uso === 'SIM') {
       where.push(`(checklist_respostas -> 'checkin' ->> 'concordo_uso') IS NOT NULL`);
     } else if (concordou_uso === 'NAO') {
       where.push(`(checklist_respostas -> 'checkin' ->> 'concordo_uso') IS NULL`);
     }
 
-    // Expressão normalizada para confirmação do checkout (sempre maiúscula, sem NULL)
-    const exprCheckoutConf = `
-      UPPER(
-        COALESCE(
-          checklist_respostas -> 'checkout' ->> 'confirmacao_checkout',
-          ''
-        )
-      )
-    `;
-
-    // Filtro: Check-out com alterações? (SIM/NAO) baseado na confirmação
+    // Filtro: Check-OUT com alterações? (usa APENAS a coluna booleana do banco)
     if (checkout_alteracoes === 'SIM') {
-      // qualquer valor que contenha "COM" (ex.: COM_ALTERACOES)
-      where.push(`${exprCheckoutConf} LIKE '%COM%'`);
+      where.push(`checkout_com_alteracoes = TRUE`);
     } else if (checkout_alteracoes === 'NAO') {
-      // qualquer valor que contenha "SEM" (ex.: SEM_ALTERACOES)
-      where.push(`${exprCheckoutConf} LIKE '%SEM%'`);
+      where.push(`checkout_com_alteracoes = FALSE`);
     }
 
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
@@ -646,17 +637,10 @@ exports.listarChecklists = async (req, res) => {
         email,
         checklist_preenchido_em,
         checklist_checkout_preenchido_em,
-        (checklist_respostas -> 'checkin') IS NOT NULL                         AS checkin_feito,
-        (checklist_respostas -> 'checkout') IS NOT NULL                        AS checkout_feito,
-        (checklist_respostas -> 'checkin' ->> 'concordo_uso') IS NOT NULL      AS concordou_uso,
-        
-        COALESCE(
-          checklist_respostas -> 'checkout' ->> 'confirmacao_checkout',
-          ''
-        ) AS checkout_confirmacao_raw,
-
-        -- Usa expressão normalizada para derivar se teve alterações no CHECK-OUT
-        (${exprCheckoutConf} LIKE '%COM%')                                     AS checkout_com_alteracoes,
+        (checklist_respostas -> 'checkin')  IS NOT NULL                   AS checkin_feito,
+        (checklist_respostas -> 'checkout') IS NOT NULL                   AS checkout_feito,
+        (checklist_respostas -> 'checkin' ->> 'concordo_uso') IS NOT NULL AS concordou_uso,
+        checkout_com_alteracoes,
         checklist_respostas
       FROM auditorio_reserva
       ${whereClause}
@@ -665,12 +649,15 @@ exports.listarChecklists = async (req, res) => {
     `;
 
     const { rows } = await db.query(sql, params);
-    res.json(rows);
+    return res.json(rows);
   } catch (err) {
     console.error('Erro ao listar checklists:', err);
-    res.status(500).json({ error: 'Erro ao listar checklists (check-in / check-out).' });
+    return res
+      .status(500)
+      .json({ error: 'Erro ao listar checklists (check-in / check-out).' });
   }
 };
+
 
 
 
