@@ -202,6 +202,7 @@ exports.responderChecklist = async (req, res) => {
         novoJson = { checkin: payload, ...base };
       }
 
+      // 🔹 Comportamento antigo: mantém na tabela de reserva
       await db.query(
         `
         UPDATE auditorio_reserva
@@ -211,10 +212,58 @@ exports.responderChecklist = async (req, res) => {
         `,
         [novoJson, token]
       );
+
+      // 🔹 NOVO: registra também na auditorio_checklist
+      try {
+        let concordouUso = null;
+
+        const brutoConcordo =
+          payload.concordo_uso ??
+          payload.concorda_uso ??
+          payload.concorda_termos ??
+          payload.concordo_termos;
+
+        if (typeof brutoConcordo === 'string') {
+          const v = brutoConcordo.trim().toUpperCase();
+          if (['SIM', 'S', 'TRUE', '1'].includes(v)) {
+            concordouUso = true;
+          } else if (['NAO', 'N', 'FALSE', '0'].includes(v)) {
+            concordouUso = false;
+          }
+        } else if (typeof brutoConcordo === 'boolean') {
+          concordouUso = brutoConcordo;
+        } else if (typeof brutoConcordo === 'number') {
+          concordouUso = brutoConcordo === 1;
+        }
+
+        await db.query(
+          `
+          INSERT INTO auditorio_checklist (
+            reserva_id,
+            tipo,
+            preenchido_em,
+            concordou_uso,
+            houve_alteracoes,
+            confirmacao_raw,
+            respostas
+          )
+          VALUES ($1, 'CHECKIN', NOW(), $2, NULL, NULL, $3)
+          `,
+          [reserva.id, concordouUso, payload]
+        );
+      } catch (errInsertCI) {
+        console.error(
+          'Não foi possível registrar checklist CHECKIN em auditorio_checklist (mas o checklist foi salvo na reserva):',
+          errInsertCI
+        );
+      }
     } else {
+      // ==========================
+      // CHECKOUT
+      // ==========================
       novoJson = { ...base, checkout: payload };
 
-      // 1º UPDATE: salva respostas e data/hora (comportamento que já funcionava)
+      // 1º UPDATE: salva respostas e data/hora na reserva (legado)
       await db.query(
         `
         UPDATE auditorio_reserva
@@ -225,7 +274,7 @@ exports.responderChecklist = async (req, res) => {
         [novoJson, token]
       );
 
-      // 2º UPDATE: flag de "com alterações?"
+      // 2º Bloco: flag de "com alterações?" + grava na nova tabela
       try {
         let houveAlteracoes = false;
 
@@ -242,17 +291,40 @@ exports.responderChecklist = async (req, res) => {
           }
         }
 
+        // Atualiza a coluna booleana na reserva (como já existia antes)
         await db.query(
           `
-      UPDATE auditorio_reserva
-         SET checkout_com_alteracoes = $1
-       WHERE checklist_token = $2
-      `,
+          UPDATE auditorio_reserva
+             SET checkout_com_alteracoes = $1
+           WHERE checklist_token = $2
+          `,
           [houveAlteracoes, token]
+        );
+
+        // 🔹 NOVO: registra CHECKOUT na auditorio_checklist
+        await db.query(
+          `
+          INSERT INTO auditorio_checklist (
+            reserva_id,
+            tipo,
+            preenchido_em,
+            concordou_uso,
+            houve_alteracoes,
+            confirmacao_raw,
+            respostas
+          )
+          VALUES ($1, 'CHECKOUT', NOW(), NULL, $2, $3, $4)
+          `,
+          [
+            reserva.id,
+            houveAlteracoes,
+            payload.confirmacao_checkout || null,
+            payload
+          ]
         );
       } catch (errFlag) {
         console.error(
-          'Não foi possível atualizar checkout_com_alteracoes (mas o checklist foi salvo):',
+          'Não foi possível atualizar checkout_com_alteracoes / gravar CHECKOUT em auditorio_checklist (mas o checklist principal foi salvo):',
           errFlag
         );
       }
@@ -264,3 +336,4 @@ exports.responderChecklist = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao salvar respostas do checklist.' });
   }
 };
+
