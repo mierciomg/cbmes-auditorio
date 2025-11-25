@@ -216,29 +216,26 @@ exports.responderChecklist = async (req, res) => {
       // 🔹 NOVO: registra também na auditorio_checklist
       try {
         // 🔎 Tenta descobrir automaticamente qual campo do payload é o "concordo com o uso"
+        // Campo real do formulário: checkbox "concordo_uso"
         let concordouUso = null;
+        const bruto = payload.concordo_uso;
 
-        // Procura uma chave que tenha "concord" ou "uso" no nome
-        const chaveConcordo = Object.keys(payload).find((k) =>
-          k.toLowerCase().includes('concord') || k.toLowerCase().includes('uso')
-        );
+        // Checkbox marcado => browser manda "on"
+        // Desmarcado => o campo nem vem no payload
+        if (typeof bruto === 'string') {
+          const v = bruto.trim().toUpperCase();
 
-        if (chaveConcordo) {
-          const bruto = payload[chaveConcordo];
-
-          if (typeof bruto === 'string') {
-            const v = bruto.trim().toUpperCase();
-            if (['SIM', 'S', 'TRUE', '1'].includes(v)) {
-              concordouUso = true;
-            } else if (['NAO', 'N', 'FALSE', '0'].includes(v)) {
-              concordouUso = false;
-            }
-          } else if (typeof bruto === 'boolean') {
-            concordouUso = bruto;
-          } else if (typeof bruto === 'number') {
-            concordouUso = bruto === 1;
+          if (v === 'ON' || ['SIM', 'S', 'TRUE', '1'].includes(v)) {
+            concordouUso = true;
+          } else if (['NAO', 'N', 'FALSE', '0', 'OFF'].includes(v)) {
+            concordouUso = false;
           }
+        } else if (typeof bruto === 'boolean') {
+          concordouUso = bruto;
+        } else if (typeof bruto === 'number') {
+          concordouUso = bruto === 1;
         }
+
 
 
         await db.query(
