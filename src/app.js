@@ -7,19 +7,22 @@ const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 require('dotenv').config();
 const pool = require('./db');
+
 const checklistRoutes = require('./routes/checklist.routes');
-
-const app = express();
-
-// ROTAS
 const authRoutes = require('./routes/auth.routes');
 const reservasRoutes = require('./routes/reservas.routes');
 const adminRoutes = require('./routes/admin.routes');
-app.use('/api/checklist', checklistRoutes);
 
+const app = express();
 
 // ======================================================
-// 🔐 SEGURANÇA BÁSICA (helmet)
+// 1) PARSE DE BODY (JSON / FORM)
+// ======================================================
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ======================================================
+// 2) SEGURANÇA BÁSICA (helmet)
 // ======================================================
 app.use(
   helmet({
@@ -28,14 +31,12 @@ app.use(
 );
 
 // ======================================================
-// 📊 LOG DE REQUISIÇÕES (morgan)
+// 3) LOG DE REQUISIÇÕES (morgan)
 // ======================================================
-// log no console no formato "dev"
-// em produção dá pra trocar pra 'combined' e/ou gravar em arquivo
 app.use(morgan('dev'));
 
 // ======================================================
-// 🔐 SESSÃO
+// 4) SESSÃO
 // ======================================================
 app.use(
   session({
@@ -51,10 +52,9 @@ app.use(
 );
 
 // ======================================================
-// 📉 RATE LIMIT (proteção de rotas sensíveis)
+// 5) RATE LIMIT (proteção de rotas sensíveis)
 // ======================================================
 
-// Limite geral para /api (ex.: 1000 req / 15min por IP)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 1000,
@@ -62,7 +62,6 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Limite mais rígido para login (ex.: 10 tentativas / 15min)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -71,33 +70,27 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Aplica o limitador geral em todas as rotas de /api
+// Limite geral para /api
 app.use('/api', apiLimiter);
 
-// Aplica o limitador específico só no endpoint de login
-// (isso depende do prefixo que você usa; aqui estou assumindo POST /api/login)
+// Limite específico de login
 app.post('/api/login', loginLimiter, (req, res, next) => next());
 
 // ======================================================
-// MIDDLEWARES BÁSICOS
-// ======================================================
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ======================================================
-// FRONTEND (pasta public)
+// 6) FRONTEND (pasta public)
 // ======================================================
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ======================================================
-// ROTAS API
+// 7) ROTAS API
 // ======================================================
+app.use('/api/checklist', checklistRoutes);
 app.use('/api', authRoutes);
 app.use('/api', reservasRoutes);
 app.use('/api', adminRoutes);
 
 // ======================================================
-// ROTA DE SAÚDE / TESTE
+// 8) ROTA DE SAÚDE / TESTE
 // ======================================================
 app.get('/api/health', async (req, res) => {
   try {
@@ -110,7 +103,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // ======================================================
-// INICIAR SERVIDOR
+// 9) INICIAR SERVIDOR
 // ======================================================
 const PORT = process.env.PORT || 3000;
 
