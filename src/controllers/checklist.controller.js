@@ -110,7 +110,8 @@ exports.responderChecklist = async (req, res) => {
   const tipo = normalizarTipo(req.query.tipo || req.body.tipo_checklist);
   const payload = req.body || {};
 
-  console.log('PAYLOAD CHECKLIST:', payload);
+  console.log('PAYLOAD CHECKLIST (req.body):', req.body);
+
 
   try {
     // 1) Localiza reserva pelo token
