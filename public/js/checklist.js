@@ -95,12 +95,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const emailPreench = document.getElementById('email_preenchedor').value.trim();
     const nomeResp = document.getElementById('nome_responsavel_checkin').value.trim();
-    const horaChegada = document.getElementById('hora_chegada').value;
-
-    if (!emailPreench || !nomeResp || !horaChegada) {
-      alert('Preencha todos os campos obrigatórios (e-mail, nome e horário de chegada).');
+    if (!emailPreench || !nomeResp) {
+      alert('Preencha todos os campos obrigatórios (e-mail e nome).');
       return;
     }
+
 
     if (!chkConcordo.checked) {
       alert(
@@ -123,6 +122,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     for (const [key, value] of formData.entries()) {
       payload[key] = value;
     }
+
+    payload.concordou_uso = chkConcordo.checked; // true se marcado, false se não
 
     // (Importante: aqui vai o campo concordo_uso = "on" quando marcado)
 

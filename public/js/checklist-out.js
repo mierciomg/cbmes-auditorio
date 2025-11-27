@@ -131,22 +131,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     r.addEventListener('change', avaliarCondicoesCheckout);
   });
 
-    // Envio do Check-OUT
+  // Envio do Check-OUT
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     mensagemEl.style.display = 'none';
 
     const email = document.getElementById('email_checkout').value.trim();
     const nome = document.getElementById('nome_responsavel_checkout').value.trim();
-    const horaEncerramento = document.getElementById('hora_encerramento').value;
     const danos = document.querySelector('input[name="danos_ocorridos"]:checked')?.value;
     const danosObs = document.getElementById('danos_ocorridos_obs').value.trim();
     const confirmacao = document.querySelector('input[name="confirmacao_checkout"]:checked')?.value;
 
-    if (!email || !nome || !horaEncerramento) {
-      alert('Preencha todos os campos obrigatórios (e-mail, nome e horário de encerramento).');
+    if (!email || !nome) {
+      alert('Preencha todos os campos obrigatórios (e-mail e nome).');
       return;
     }
+
 
     if (!confirmacao) {
       alert('Selecione uma opção de confirmação de Check-OUT.');

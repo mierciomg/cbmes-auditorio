@@ -1,175 +1,162 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <title>Check-IN do Auditório – CBMES</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/checklist.css" />
 </head>
+
 <body>
 
-<div class="page-wrapper">
-  <div class="card" id="cardChecklist">
-    <h1 class="titulo">Check-IN do auditório</h1>
-    <p class="subtitulo" id="infoReserva">
-      Carregando informações da reserva...
-    </p>
-
-    <div id="mensagem" class="mensagem" style="display:none;"></div>
-
-    <form id="formChecklist" class="form-grid" style="display:none;">
-
-      <!-- SEÇÃO 0 – Identificação de quem está preenchendo -->
-      <h2 class="subtitulo-secao">Identificação do responsável pelo Check-IN</h2>
-
-      <div class="form-group">
-        <label for="email_preenchedor">E-mail de quem está preenchendo *</label>
-        <input type="email"
-               id="email_preenchedor"
-               name="email_preenchedor"
-               required
-               placeholder="nome@orgao.gov.br" />
-      </div>
-
-      <div class="form-group">
-        <label for="nome_responsavel_checkin">Nome do responsável pelo Check-IN *</label>
-        <input type="text"
-               id="nome_responsavel_checkin"
-               name="nome_responsavel_checkin"
-               required
-               placeholder="Informe seu nome completo" />
-      </div>
-
-      <!-- SEÇÃO 1 – INFORMAÇÕES IMPORTANTES -->
-      <h2 class="subtitulo-secao">Seção 1 – Informações importantes (leitura obrigatória)</h2>
-
-      <div class="bloco-informacoes">
-        <p><strong>Antes de preencher o formulário, leia atentamente as informações e regras de uso do auditório do CAT.</strong></p>
-
-        <p><strong>Recursos disponíveis:</strong><br>
-          • Espaço climatizado e mobiliado (123 cadeiras fixas e mesa principal);<br>
-          • Iluminação controlada por painel lateral;<br>
-          • Copa disponível para uso (localizada atrás do auditório).
-        </p>
-
-        <p><strong>Recursos não disponíveis:</strong><br>
-          • Notebook;<br>
-          • Data show (projetor);<br>
-          • Caixa de som / sistema de sonorização.<br>
-          <span class="texto-alerta">
-            ⚠️ Caso o evento exija recursos audiovisuais, o setor solicitante deverá providenciar seus próprios equipamentos,
-            respeitando as normas de segurança e ruído do CAT.
-          </span>
-        </p>
-
-        <p><strong>Proibições e condutas não permitidas:</strong><br>
-          Durante a utilização do auditório, é expressamente proibido:
-        </p>
-        <ul>
-          <li>Fumar, comer ou beber dentro do auditório;</li>
-          <li>Arrastar, retirar ou utilizar cadeiras, mesas ou móveis de outros ambientes;</li>
-          <li>Alterar a disposição fixa das cadeiras;</li>
-          <li>Utilizar o auditório fora do horário previamente agendado;</li>
-          <li>Utilizar o portão em frente ao CAT para trânsito de pessoas ou veículos;</li>
-          <li>Utilizar vagas de estacionamento sinalizadas como reservadas para uso institucional do CAT;</li>
-          <li>Ocupar de forma indevida vagas destinadas a idosos, PCD ou de uso exclusivo do CAT.</li>
-        </ul>
-
-        <p><strong>Observações gerais:</strong></p>
-        <ul>
-          <li>O CAT não dispõe de materiais de higiene (papel higiênico, papel toalha, sabonete líquido) e descartáveis (copo descartável);</li>
-          <li>O auditório é disponibilizado mediante check-in e check-out feitos pelo responsável solicitante;</li>
-          <li>O solicitante responde pela conservação do espaço e pela devolução em boas condições;</li>
-          <li>Qualquer ocorrência deve ser comunicada à Seção de Logística imediatamente após o uso.</li>
-        </ul>
-      </div>
-
-      <div class="form-group aceite-condicoes">
-        <span>Declaro que li as informações acima e estou ciente das regras de uso do auditório do CAT/CBMES.</span>
-        <div class="opcoes-coluna">
-          <label>
-            <input type="checkbox" id="concordo_uso" name="concordo_uso" />
-            Concordo com as condições de uso do auditório.
-          </label>
-          <label>
-            <input type="checkbox" id="nao_concordo_uso" name="nao_concordo_uso" />
-            Não concordo com as condições de uso do auditório.
-          </label>
-        </div>
-      </div>
-
-      <!-- SEÇÃO 2 – CHECK-IN -->
-      <h2 class="subtitulo-secao">Seção 2 – Check-IN (entrada no auditório)</h2>
-
-      <p class="texto-menor">
-        No momento do check-in, registre as condições em que o ambiente foi encontrado.
+  <div class="page-wrapper">
+    <div class="card" id="cardChecklist">
+      <h1 class="titulo">Check-IN do auditório</h1>
+      <p class="subtitulo" id="infoReserva">
+        Carregando informações da reserva...
       </p>
 
-      <div class="form-group">
-        <label for="hora_chegada">Horário de chegada *</label>
-        <input type="time"
-               id="hora_chegada"
-               name="hora_chegada"
-               required />
-      </div>
+      <div id="mensagem" class="mensagem" style="display:none;"></div>
 
-      <div class="form-group">
-        <label>O ambiente estava limpo e organizado? *</label>
-        <div class="opcoes">
-          <label><input type="radio" name="ambiente_limpo" value="SIM" required> Sim</label>
-          <label><input type="radio" name="ambiente_limpo" value="NAO"> Não</label>
+      <form id="formChecklist" class="form-grid" style="display:none;">
+
+        <!-- SEÇÃO 0 – Identificação de quem está preenchendo -->
+        <h2 class="subtitulo-secao">Identificação do responsável pelo Check-IN</h2>
+
+        <div class="form-group">
+          <label for="email_preenchedor">E-mail de quem está preenchendo *</label>
+          <input type="email" id="email_preenchedor" name="email_preenchedor" required
+            placeholder="nome@orgao.gov.br" />
         </div>
-        <textarea name="ambiente_limpo_obs"
-                  placeholder="Observações (se necessário)"></textarea>
-      </div>
 
-      <div class="form-group">
-        <label>A iluminação estava funcionando? *</label>
-        <div class="opcoes">
-          <label><input type="radio" name="iluminacao_ok" value="SIM" required> Sim</label>
-          <label><input type="radio" name="iluminacao_ok" value="NAO"> Não</label>
+        <div class="form-group">
+          <label for="nome_responsavel_checkin">Nome do responsável pelo Check-IN *</label>
+          <input type="text" id="nome_responsavel_checkin" name="nome_responsavel_checkin" required
+            placeholder="Informe seu nome completo" />
         </div>
-        <textarea name="iluminacao_obs"
-                  placeholder="Observações (se necessário)"></textarea>
-      </div>
 
-      <div class="form-group">
-        <label>Climatização estava funcionando? *</label>
-        <div class="opcoes">
-          <label><input type="radio" name="climatizacao_ok" value="SIM" required> Sim</label>
-          <label><input type="radio" name="climatizacao_ok" value="NAO"> Não</label>
+        <!-- SEÇÃO 1 – INFORMAÇÕES IMPORTANTES -->
+        <h2 class="subtitulo-secao">Seção 1 – Informações importantes (leitura obrigatória)</h2>
+
+        <div class="bloco-informacoes">
+          <p><strong>Antes de preencher o formulário, leia atentamente as informações e regras de uso do auditório do
+              CAT.</strong></p>
+
+          <p><strong>Recursos disponíveis:</strong><br>
+            • Espaço climatizado e mobiliado (123 cadeiras fixas e mesa principal);<br>
+            • Iluminação controlada por painel lateral;<br>
+            • Copa disponível para uso (localizada atrás do auditório).
+          </p>
+
+          <p><strong>Recursos não disponíveis:</strong><br>
+            • Notebook;<br>
+            • Data show (projetor);<br>
+            • Caixa de som / sistema de sonorização.<br>
+            <span class="texto-alerta">
+              ⚠️ Caso o evento exija recursos audiovisuais, o setor solicitante deverá providenciar seus próprios
+              equipamentos, respeitando as normas de segurança e ruído do CAT.
+            </span>
+          </p>
+
+          <p><strong>Proibições e condutas não permitidas:</strong><br>
+            Durante a utilização do auditório, é expressamente proibido:
+          </p>
+          <ul>
+            <li>Fumar, comer ou beber dentro do auditório;</li>
+            <li>Arrastar, retirar ou utilizar cadeiras, mesas ou móveis de outros ambientes;</li>
+            <li>Alterar a disposição fixa das cadeiras;</li>
+            <li>Utilizar o auditório fora do horário previamente agendado;</li>
+            <li>Utilizar o portão em frente ao CAT para trânsito de pessoas ou veículos;</li>
+            <li>Utilizar vagas de estacionamento sinalizadas como reservadas para uso institucional do CAT;</li>
+            <li>Ocupar de forma indevida vagas destinadas a idosos, PCD ou de uso exclusivo do CAT.</li>
+          </ul>
+
+          <p><strong>Observações gerais:</strong></p>
+          <ul>
+            <li>O CAT não dispõe de materiais de higiene (papel higiênico, papel toalha, sabonete líquido) e
+              descartáveis (copo descartável);</li>
+            <li>O auditório é disponibilizado mediante check-in e check-out feitos pelo responsável solicitante;</li>
+            <li>O solicitante responde pela conservação do espaço e pela devolução em boas condições;</li>
+            <li>Qualquer ocorrência deve ser comunicada à Seção de Logística imediatamente após o uso.</li>
+          </ul>
         </div>
-        <textarea name="climatizacao_obs"
-                  placeholder="Observações (se necessário)"></textarea>
-      </div>
 
-      <div class="form-group">
-        <label>Identificou eventuais avarias? *</label>
-        <div class="opcoes">
-          <label><input type="radio" name="avarias_identificadas" value="NAO" required> Não</label>
-          <label><input type="radio" name="avarias_identificadas" value="SIM"> Sim</label>
+        <div class="form-group aceite-condicoes">
+          <span>Declaro que li as informações acima e estou ciente das regras de uso do auditório do CAT/CBMES.</span>
+          <div class="opcoes-coluna">
+            <label>
+              <input type="checkbox" id="concordo_uso" name="concordo_uso" />
+              Concordo com as condições de uso do auditório.
+            </label>
+            <label>
+              <input type="checkbox" id="nao_concordo_uso" name="nao_concordo_uso" />
+              Não concordo com as condições de uso do auditório.
+            </label>
+          </div>
         </div>
-        <textarea name="avarias_obs"
-                  placeholder="Descreva as avarias, se houver"></textarea>
-      </div>
 
-      <div class="form-group">
-        <label>Informe qualquer outra anomalia encontrada no momento do Check-IN:</label>
-        <textarea name="outras_anomalias"
-                  placeholder="Descreva outras ocorrências relevantes"></textarea>
-      </div>
+        <!-- SEÇÃO 2 – CHECK-IN -->
+        <h2 class="subtitulo-secao">Seção 2 – Check-IN (entrada no auditório)</h2>
 
-      <button type="submit" class="btn-primario">
-        Confirmar Check-IN
+        <p class="texto-menor">
+          No momento do check-in, registre as condições em que o ambiente foi encontrado.
+        </p>
+
+        
+        <div class="form-group">
+          <label>O ambiente estava limpo e organizado? *</label>
+          <div class="opcoes">
+            <label><input type="radio" name="ambiente_limpo" value="SIM" required> Sim</label>
+            <label><input type="radio" name="ambiente_limpo" value="NAO"> Não</label>
+          </div>
+          <textarea name="ambiente_limpo_obs" placeholder="Observações (se necessário)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>A iluminação estava funcionando? *</label>
+          <div class="opcoes">
+            <label><input type="radio" name="iluminacao_ok" value="SIM" required> Sim</label>
+            <label><input type="radio" name="iluminacao_ok" value="NAO"> Não</label>
+          </div>
+          <textarea name="iluminacao_obs" placeholder="Observações (se necessário)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Climatização estava funcionando? *</label>
+          <div class="opcoes">
+            <label><input type="radio" name="climatizacao_ok" value="SIM" required> Sim</label>
+            <label><input type="radio" name="climatizacao_ok" value="NAO"> Não</label>
+          </div>
+          <textarea name="climatizacao_obs" placeholder="Observações (se necessário)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Identificou eventuais avarias? *</label>
+          <div class="opcoes">
+            <label><input type="radio" name="avarias_identificadas" value="NAO" required> Não</label>
+            <label><input type="radio" name="avarias_identificadas" value="SIM"> Sim</label>
+          </div>
+          <textarea name="avarias_obs" placeholder="Descreva as avarias, se houver"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Informe qualquer outra anomalia encontrada no momento do Check-IN:</label>
+          <textarea name="outras_anomalias" placeholder="Descreva outras ocorrências relevantes"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primario">
+          Confirmar Check-IN
+        </button>
+      </form>
+
+      <button type="button" class="btn-link" id="btnVoltarInicio">
+        ⟵ Voltar para a página inicial
       </button>
-    </form>
-
-    <button type="button" class="btn-link" id="btnVoltarInicio">
-      ⟵ Voltar para a página inicial
-    </button>
+    </div>
   </div>
-</div>
 
-<script src="js/checklist.js"></script>
+  <script src="js/checklist.js"></script>
 </body>
+
 </html>
