@@ -1,8 +1,16 @@
 // src/services/mail.service.js
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-// Inicializa o cliente Resend usando a API Key do .env
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Transporter usando Gmail
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // Usa STARTTLS
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 async function enviarEmail({ to, subject, html }) {
   try {
@@ -11,22 +19,22 @@ async function enviarEmail({ to, subject, html }) {
       return;
     }
 
-    console.log('[MAILER] Enviando e-mail via RESEND API...', { to, subject });
+    console.log('[MAILER] Enviando e-mail via GMAIL SMTP...', { to, subject });
 
-    const response = await resend.emails.send({
-      from: 'noreply@comunidadefacil.com.br', // domínio verificado!
+    const response = await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER, 
       to,
       subject,
       html,
     });
 
-    console.log('[MAILER] E-mail enviado com sucesso!', response);
+    console.log('[MAILER] E-mail enviado com sucesso!', response.messageId);
+
     return response;
   } catch (err) {
-    console.error('[MAILER] Erro ao enviar e-mail via RESEND API:', err);
+    console.error('[MAILER] Erro ao enviar e-mail via GMAIL SMTP:', err);
     throw err;
   }
 }
 
 module.exports = { enviarEmail };
-

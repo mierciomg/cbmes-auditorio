@@ -1,17 +1,19 @@
 // src/db.js
 const { Pool } = require('pg');
-require('dotenv').config();
 
-// Conexão com o PostgreSQL (Neon)
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error('ERRO: DATABASE_URL não definida nas variáveis de ambiente.');
+  throw new Error('DATABASE_URL não configurada');
+}
+
+// Se DB_SSL = 'true', usa SSL; senão, não usa.
+const useSSL = process.env.DB_SSL === 'true';
+
 const pool = new Pool({
-  host: process.env.PGHOST,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  port: process.env.PGPORT,
-  ssl: {
-    rejectUnauthorized: false, // necessário para o Neon (SSL obrigatório)
-  },
+  connectionString,
+  ssl: useSSL ? { rejectUnauthorized: false } : false,
 });
 
 module.exports = pool;

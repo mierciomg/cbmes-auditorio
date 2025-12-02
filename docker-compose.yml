@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: auditorio-app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/usr/src/app/src/uploads
+
+  db:
+    image: postgres:15
+    container_name: auditorio-db
+    environment:
+      POSTGRES_USER: auditorio_user
+      POSTGRES_PASSWORD: auditorio_pass
+      POSTGRES_DB: auditorio_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Porta exposta para acesso via rede (DBeaver, BI etc.)
+      - "5433:5432"
+
+volumes:
+  postgres_data:
+  uploads_data:

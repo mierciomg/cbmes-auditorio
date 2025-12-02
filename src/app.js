@@ -82,6 +82,12 @@ app.post('/api/login', loginLimiter, (req, res, next) => next());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ======================================================
+// 6.1) PASTA DE UPLOADS (acesso a anexos)
+// ======================================================
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+// ======================================================
 // 7) ROTAS API
 // ======================================================
 app.use('/api/checklist', checklistRoutes);
